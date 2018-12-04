@@ -1,0 +1,19 @@
+Starts a temporary zalenium server, that stores videos of the selenium tests in the workspace.
+
+Requires Docker!
+
+(optional) Parameters:
+
+- seleniumVersion - version of the "elgalu/selenium" docker image
+- zaleniumVersion - version of the "dosel/zalenium" docker image
+- zaleniumVideoDir - workspace relative path
+- debugZalenium - prints a lot more logs
+
+Exemplary calls:
+
+- withZalenium { zaleniumIp ->
+    // call your selenium tests using maven, yarn, etc.
+  }
+- withZalenium([ seleniumVersion : '3.14.0-p15' ]) { zaleniumIp ->
+      // call your selenium tests using maven, yarn, etc.
+  }
