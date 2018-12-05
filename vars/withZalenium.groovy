@@ -1,7 +1,14 @@
-void call(config = [seleniumVersion : '3.141.59-p2',
-                    zaleniumVersion : '3.141.59d',
-                    zaleniumVideoDir: "zalenium",
-                    debugZalenium   : false], Closure closure) {
+
+void call(config = [:], Closure closure) {
+
+    def defaultConfig = [seleniumVersion : '3.141.59-p2',
+                         zaleniumVersion : '3.141.59d',
+                         zaleniumVideoDir: "zalenium",
+                         debugZalenium   : false]
+
+    // Merge default config with the one passed as parameter
+    config = defaultConfig << config
+
     sh "mkdir -p ${config.zaleniumVideoDir}"
 
     docker.image("elgalu/selenium:${config.seleniumVersion}").pull()
@@ -13,7 +20,7 @@ void call(config = [seleniumVersion : '3.141.59-p2',
         zaleniumImage.withRun(
                 // Zalenium starts headless browsers in docker containers, so it needs the socket
                 '-v /var/run/docker.sock:/var/run/docker.sock ' +
-                        "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
+                "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
                 'start ' +
                         "${config.debugZalenium ? '--debugEnabled true' : ''}"
         ) { zaleniumContainer ->
