@@ -6,8 +6,8 @@ Requires Docker!
 
 - seleniumVersion - version of the "elgalu/selenium" docker image
 - zaleniumVersion - version of the "dosel/zalenium" docker image
-- zaleniumVideoDir - workspace relative path
-- debugZalenium - prints a lot more logs
+- zaleniumVideoDir - workspace relative path where the videos are stored
+- debugZalenium - makes the zalenium container write a lot more logs
 
 Exemplary calls:
 
