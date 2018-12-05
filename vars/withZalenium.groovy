@@ -5,37 +5,43 @@ void call(config = [seleniumVersion : '3.141.59-p2',
     sh "mkdir -p ${config.zaleniumVideoDir}"
 
     docker.image("elgalu/selenium:${config.seleniumVersion}").pull()
-    docker.image("dosel/zalenium:${config.zaleniumVersion}")
-            .withRun(
-            // Zalenium starts headless browsers in docker containers, so it needs the socket
-            '-v /var/run/docker.sock:/var/run/docker.sock ' +
-                    "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
-            'start ' +
-                    "${config.debugZalenium ? '--debugEnabled true' : ''}"
-    ) { zaleniumContainer ->
+    def zaleniumImage = docker.image("dosel/zalenium:${config.zaleniumVersion}")
+    zaleniumImage.pull()
 
-        def zaleniumIp = findContainerIp(zaleniumContainer)
+    lock("zalenium") {
 
-        waitForSeleniumToGetReady(zaleniumIp)
-        // Delete videos from previous builds, if any
-        // This also works around the bug that zalenium stores files as root
-        // https://github.com/zalando/zalenium/issues/760
-        // This workaround still leaves a couple of files owned by root in the zaleniumVideoDir
-        resetZalenium(zaleniumIp)
+        zaleniumImage.withRun(
+                // Zalenium starts headless browsers in docker containers, so it needs the socket
+                '-v /var/run/docker.sock:/var/run/docker.sock ' +
+                        "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
+                'start ' +
+                        "${config.debugZalenium ? '--debugEnabled true' : ''}"
+        ) { zaleniumContainer ->
 
-        try {
-            closure(zaleniumIp)
-        } finally {
-            // Wait for Selenium sessions to end (i.e. videos to be copied)
-            // Leaving the withRun() closure leads to "docker rm -f" being called, cancelling copying
-            waitForSeleniumSessionsToEnd(zaleniumIp)
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${config.zaleniumVideoDir}/*.mp4"
+            def zaleniumIp = findContainerIp(zaleniumContainer)
 
-            // Stop container gracefully and wait
-            sh "docker stop ${zaleniumContainer.id}"
-            // Store log for debugging purposes
-            sh "docker logs ${zaleniumContainer.id} > zalenium-docker.log 2>&1"
+            waitForSeleniumToGetReady(zaleniumIp)
+            // Delete videos from previous builds, if any
+            // This also works around the bug that zalenium stores files as root
+            // https://github.com/zalando/zalenium/issues/760
+            // This workaround still leaves a couple of files owned by root in the zaleniumVideoDir
+            resetZalenium(zaleniumIp)
+
+            try {
+                closure(zaleniumIp)
+            } finally {
+                // Wait for Selenium sessions to end (i.e. videos to be copied)
+                // Leaving the withRun() closure leads to "docker rm -f" being called, cancelling copying
+                waitForSeleniumSessionsToEnd(zaleniumIp)
+                archiveArtifacts allowEmptyArchive: true, artifacts: "${config.zaleniumVideoDir}/*.mp4"
+
+                // Stop container gracefully and wait
+                sh "docker stop ${zaleniumContainer.id}"
+                // Store log for debugging purposes
+                sh "docker logs ${zaleniumContainer.id} > zalenium-docker.log 2>&1"
+            }
         }
+
     }
 }
 
