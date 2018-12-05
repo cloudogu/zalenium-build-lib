@@ -1,6 +1,6 @@
-void call(config = [seleniumVersion : '3.14.0-p15',
-                    zaleniumVersion : '3.14.0g',
-                    zaleniumVideoDir: "${env.WORKSPACE}/zalenium",
+void call(config = [seleniumVersion : '3.141.59-p2',
+                    zaleniumVersion : '3.141.59d',
+                    zaleniumVideoDir: "zalenium",
                     debugZalenium   : false], Closure closure) {
     sh "mkdir -p ${config.zaleniumVideoDir}"
 
@@ -9,7 +9,7 @@ void call(config = [seleniumVersion : '3.14.0-p15',
             .withRun(
             // Zalenium starts headless browsers in docker containers, so it needs the socket
             '-v /var/run/docker.sock:/var/run/docker.sock ' +
-                    "-v ${config.zaleniumVideoDir}:/home/seluser/videos",
+                    "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
             'start ' +
                     "${config.debugZalenium ? '--debugEnabled true' : ''}"
     ) { zaleniumContainer ->
@@ -41,8 +41,8 @@ void call(config = [seleniumVersion : '3.14.0-p15',
 
 String findContainerIp(container) {
     sh (returnStdout: true,
-        script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container.id}")
-        .trim()
+            script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container.id}")
+            .trim()
 }
 
 void waitForSeleniumToGetReady(String host) {
