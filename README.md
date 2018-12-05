@@ -1,4 +1,5 @@
 ![Cloudogu logo](https://cloudogu.com/images/logo.png)
+
 zalenium-build-lib
 =======
 
@@ -43,6 +44,23 @@ Even more convenient: You could watch the videos in the browser directly. This i
   `System.setProperty("hudson.model.DirectoryBrowserSupport.CSP", "sandbox; default-src 'none'; img-src 'self'; style-src 'self'; media-src 'self';")`
   * Or you start your Jenkins instance with   
   `-Dhudson.model.DirectoryBrowserSupport.CSP="sandbox; default-src 'none'; img-src 'self'; style-src 'self'; media-src 'self';"`
+
+## Locking
+
+Right now, only one Job can run Zalenium Tests at a time.
+This could be improved in the future. 
+
+## Why?
+
+When multiple jobs executed we faced non-deterministic issues that the zalenium container was gone all of a sudden, 
+connections were aborted or timed out.
+
+So we implemented a lock before starting zalenium that can only be passed by one job at a time.
+It feels like this issue is gone now, but we're not sure if the lock was the proper fix.
+
+## How?
+
+We use the `lock` step of the [Lockable Resources Plugin](https://wiki.jenkins.io/display/JENKINS/Lockable+Resources+Plugin).
 
 # Troubleshooting
 
