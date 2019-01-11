@@ -1,8 +1,8 @@
 
 void call(config = [:], Closure closure) {
 
-    def defaultConfig = [seleniumVersion : '3.141.59-p2',
-                         zaleniumVersion : '3.141.59d',
+    def defaultConfig = [seleniumVersion : '3.141.59-p8',
+                         zaleniumVersion : '3.141.59f',
                          zaleniumVideoDir: "zalenium",
                          debugZalenium   : false]
 
@@ -29,7 +29,7 @@ void call(config = [:], Closure closure) {
 
             waitForSeleniumToGetReady(zaleniumIp)
             // Delete videos from previous builds, if any
-            // This also works around the bug that zalenium stores files as root
+            // This also works around the bug that zalenium stores files as root (before version 3.141.59f)
             // https://github.com/zalando/zalenium/issues/760
             // This workaround still leaves a couple of files owned by root in the zaleniumVideoDir
             resetZalenium(zaleniumIp)
