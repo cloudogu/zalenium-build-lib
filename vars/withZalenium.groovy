@@ -2,7 +2,7 @@
 void call(config = [:], Closure closure) {
 
     def defaultConfig = [seleniumVersion : '3.141.59-p8',
-                         zaleniumVersion : '3.141.59f',
+                         zaleniumVersion : '3.141.59g',
                          zaleniumVideoDir: "zalenium",
                          debugZalenium   : false]
 
@@ -15,9 +15,13 @@ void call(config = [:], Closure closure) {
     def zaleniumImage = docker.image("dosel/zalenium:${config.zaleniumVersion}")
     zaleniumImage.pull()
 
-    lock("zalenium") {
+    uid = findUid()
+    gid = findGid()
 
+    lock("zalenium") {
         zaleniumImage.withRun(
+                // Run with Jenkins user, so the files created in the workspace by zalenium can be deleted later
+                "-u ${uid}:${gid} -e HOST_UID=${uid} -e HOST_GID=${gid} " +
                 // Zalenium starts headless browsers in docker containers, so it needs the socket
                 '-v /var/run/docker.sock:/var/run/docker.sock ' +
                 "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
@@ -55,6 +59,17 @@ void call(config = [:], Closure closure) {
 String findContainerIp(container) {
     sh (returnStdout: true,
             script: "docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ${container.id}")
+            .trim()
+}
+
+String findUid() {
+    sh (returnStdout: true,
+            script: 'id -u')
+            .trim()
+}
+String findGid() {
+    sh (returnStdout: true,
+            script: 'id -g')
             .trim()
 }
 

@@ -4,7 +4,7 @@ zalenium-build-lib
 =======
 
 Jenkins shared library that provides a step that runs a temporary [zalenium server](https://github.com/zalando/zalenium) 
-in a via docker, that records videos of selenium tests. The videos are archived at the Jenkins job by this library.
+in docker container, that records videos of selenium tests. The videos are archived at the Jenkins job by this library.
 
 # Usage
 
@@ -64,7 +64,7 @@ We use the `lock` step of the [Lockable Resources Plugin](https://wiki.jenkins.i
 
 # Troubleshooting
 
-The logs of the zalenium container are stored in $WORKSPACE/zalenium-docker.log.
+The logs of the zalenium container are stored in `$WORKSPACE/zalenium-docker.log`.
 
 You can enable debug logging like so:
 
@@ -78,3 +78,7 @@ withZalenium([ debugZalenium : true ]) { zaleniumIp ->
 
 * [cloudogu/spring-petclinic](https://github.com/cloudogu/spring-petclinic/blob/548db42f320f0f9065876c588c93754beffacc36/Jenkinsfile) (Java / Maven)
 * [cloudogu/nexus](https://github.com/cloudogu/nexus/blob/434c8c3ebef740cd887462aad1292971c46d883e/Jenkinsfile)  (JavaScript / yarn)
+* [cloudogu/jenkins](https://github.com/cloudogu/jenkins/blob/3bc8b6ab406477e0c3bb232e05f745b1fc91ba70/Jenkinsfile)  (JavaScript / yarn)
+* [cloudogu/redmine](https://github.com/cloudogu/redmine/blob/740dd3a99a8111c31e4ada1ccb3023d84d6d205f/Jenkinsfile)  (JavaScript / yarn)
+* [cloudogu/scm](https://github.com/cloudogu/scm/blob/4f1c998425e175a7a52f97dff5b78e82f244a9bf/Jenkinsfile)  (JavaScript / yarn)
+* [cloudogu/sonar](https://github.com/cloudogu/sonar/blob/3488a6e7e38ee5e2e8fde807de570028e15835a1/Jenkinsfile)  (JavaScript / yarn)
