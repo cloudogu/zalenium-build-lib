@@ -1,19 +1,22 @@
-Starts a temporary zalenium server, that stores videos of the selenium tests in the workspace.
+Starts a temporary Zalenium server that stores videos of the selenium tests in the workspace.
 
 Requires Docker!
 
 (optional) Parameters:
 
-- seleniumVersion - version of the "elgalu/selenium" docker image
-- zaleniumVersion - version of the "dosel/zalenium" docker image
-- zaleniumVideoDir - workspace relative path where the videos are stored
+- seleniumImage - the full name of the selenium image name including the registry. Defaults to 'elgalu/selenium' from hub.docker.com. The selenium image is used by Zalenium.
+- seleniumVersion - version of the selenium docker image
+- zaleniumImage - the full name of the zalenium image name including the registry. Defaults to 'dosel/zalenium' from hub.docker.com.
+- zaleniumVersion - version of the zalenium docker image
+- zaleniumVideoDir - path where the videos are stored, relative to the Jenkins workspace.
 - debugZalenium - makes the zalenium container write a lot more logs
+- sendGoogleAnalytics - if true this will send analytic data to Google/Zalando
 
 Exemplary calls:
 
-- withZalenium { zaleniumIp ->
+- withZalenium { zaleniumContainer, zaleniumIp, userid, groupid ->
     // call your selenium tests using maven, yarn, etc.
   }
-- withZalenium([ seleniumVersion : '3.14.0-p15' ]) { zaleniumIp ->
+- withZalenium([ seleniumVersion : '3.14.0-p15' ]) { zaleniumContainer, zaleniumIp, userid, groupid ->
       // call your selenium tests using maven, yarn, etc.
   }

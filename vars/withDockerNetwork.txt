@@ -1,0 +1,22 @@
+Starts a temporary docker network so docker containers can interact even without IP address. The created network will
+be removed once the body finishes.
+
+Requires Docker!
+
+(optional) Parameters:
+
+- printDebugOutput - this bool adds network creation and removal output to the Jenkins console log for debugging
+    purposes.
+
+Exemplary calls:
+
+- withDockerNetwork { networkName ->
+    // create your container with the networkName along the lines of this:
+    docker.image("foo/bar:1.2.3").withRun("--network ${networkName}") {
+        ...
+    }
+- debugOutput = true; withDockerNetwork(debugOutput) { networkName ->
+  // prints the creation and removal of the docker network in your output
+          // create your container with the networkName along the lines of this:
+          docker.image("foo/bar:1.2.3").withRun("--network ${networkName}") {
+  }
