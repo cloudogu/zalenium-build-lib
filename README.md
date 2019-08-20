@@ -45,12 +45,30 @@ Even more convenient: You could watch the videos in the browser directly. This i
   * Or you start your Jenkins instance with   
   `-Dhudson.model.DirectoryBrowserSupport.CSP="sandbox; default-src 'none'; img-src 'self'; style-src 'self'; media-src 'self';"`
 
+## Docker Network creation
+
+It is possible (although not necessary) to explicitly work with docker networks. This library supports the automatic creation and removal of a bridge network with a unique name.
+
+### How
+
+`withZalenium` accepts now an optional network name the Zalenium container can attach to the given network. Conveniently a docker network can be created with this pipeline step which provides the dynamically created network name.
+
+```
+    withDockerNetwork { networkName ->
+        def yourConfig = [:]
+        withZalenium(yourConfig, networkName) {}
+            docker.image("foo/bar:1.2.3").withRun("--network ${network}") {
+            ...
+    }
+
+```
+
 ## Locking
 
 Right now, only one Job can run Zalenium Tests at a time.
 This could be improved in the future. 
 
-## Why?
+### Why?
 
 When multiple jobs executed we faced non-deterministic issues that the zalenium container was gone all of a sudden, 
 connections were aborted or timed out.
@@ -58,7 +76,7 @@ connections were aborted or timed out.
 So we implemented a lock before starting zalenium that can only be passed by one job at a time.
 It feels like this issue is gone now, but we're not sure if the lock was the proper fix.
 
-## How?
+### How?
 
 We use the `lock` step of the [Lockable Resources Plugin](https://wiki.jenkins.io/display/JENKINS/Lockable+Resources+Plugin).
 
