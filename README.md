@@ -63,6 +63,50 @@ It is possible (although not necessary) to explicitly work with docker networks.
 
 ```
 
+## Working with Truststores
+
+Often comes a Truststore into play while working with Jenkins and Java. Jenkins can accommodate necessary certificates in its truststore so Java applications like Maven (and others too!) can successfully interact with other parties, like download artifacts from artifact repositories or transport data over the network. Even so, it may be necessary to provide these Java applications with the right certificates when otherwise encrypted communication would fail without doing so.
+
+## Simple Truststore pipeline
+
+For such circumstances this library provides a small snippet.
+
+```
+Library ('zalenium-build-lib') import com.cloudogu.Truststore
+
+def truststore = new com.cloudogu.Truststore(this)
+
+node('master') {
+    truststore.copy() // by default Jenkin's truststore is copied to the workspace
+}
+node('anotherOne') {
+    //use the truststore
+    //javaAppRun -Djavax.net.ssl.trustStore=./truststore.jks -Djavax.net.ssl.trustStorePassword=changeit 
+    
+    truststore.remove() // remove the truststore for added security
+}
+```
+
+## Alternative Ways of Configuration
+
+It is possible to supply a different truststore than the Jenkins one. Also it is possible to provide a different name in order to avoid filename collision:
+
+ ```
+ Library ('zalenium-build-lib') import com.cloudogu.Truststore
+ 
+ def truststore = new com.cloudogu.Truststore(this, '/path/to/alternative/truststore.jks', 'mytruststore-alpha.jks')
+ 
+ node('master') {
+     truststore.copy()
+ }
+ node('anotherOne') {
+     //use the truststore
+     //javaAppRun -Djavax.net.ssl.trustStore=./mytruststore-alpha.jks -Djavax.net.ssl.trustStorePassword=thatOtherPassword 
+     
+     truststore.remove()
+ }
+ ```
+
 ## Locking
 
 Right now, only one Job can run Zalenium Tests at a time.
