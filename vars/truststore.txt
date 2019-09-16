@@ -1,0 +1,25 @@
+Starts copies and provides a truststore files for safe use over different Jenkins nodes. When the build job finishes there
+will be no truststore file left in the Jenkins workspace.
+
+By default Jenkins's truststore will be used: `/var/lib/jenkins/truststore.jks`
+
+(optional) Parameters:
+
+- pathToTruststore - This path pointing to the truststore file will be used instead of the default path.
+
+Method summary:
+
+- copy() - copies a truststore file and stashed it for later use.
+- use { truststoreFile -> } - enables the usage of the previously copied truststore file. The truststore file which
+    was extracted from the stash will be deleted once the body finishes.
+
+Exemplary calls:
+
+node 'master' {
+    truststore.copy()
+}
+node 'docker' {
+    truststore.use { truststoreFile ->
+        javaOrMvn "-Djavax.net.ssl.trustStore=${truststoreFile} -Djavax.net.ssl.trustStorePassword=changeit"
+    }
+}

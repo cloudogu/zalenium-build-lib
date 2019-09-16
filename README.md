@@ -69,21 +69,25 @@ Often comes a Truststore into play while working with Jenkins and Java. Jenkins 
 
 ## Simple Truststore pipeline
 
-For such circumstances this library provides a small snippet.
+For such circumstances this library provides a small snippet. The global `truststore` variable ensures that any truststore files which are copied in the process are also removed at the end of both `copy` and `use` actions.
 
+In order to successfully provide a truststore to any Java process this sequence must be in order:
+
+1. copy the truststore with `truststore.copy()`   
+1. use the copied truststore with `truststore.use { truststoreFile -> }`
+
+Here is a more elaborate example:
+ 
 ```
-Library ('zalenium-build-lib') import com.cloudogu.Truststore
+Library ('zalenium-build-lib') _
 
-def truststore = new com.cloudogu.Truststore(this)
-
-node('master') {
-    truststore.copy() // by default Jenkin's truststore is copied to the workspace
+node 'master' {
+    truststore.copy()
 }
-node('anotherOne') {
-    //use the truststore
-    //javaAppRun -Djavax.net.ssl.trustStore=./truststore.jks -Djavax.net.ssl.trustStorePassword=changeit 
-    
-    truststore.remove() // remove the truststore for added security
+node 'docker' {
+    truststore.use { truststoreFile ->
+        javaOrMvn "-Djavax.net.ssl.trustStore=${truststoreFile} -Djavax.net.ssl.trustStorePassword=changeit"
+    }
 }
 ```
 
@@ -91,21 +95,16 @@ node('anotherOne') {
 
 It is possible to supply a different truststore than the Jenkins one. Also it is possible to provide a different name in order to avoid filename collision:
 
- ```
- Library ('zalenium-build-lib') import com.cloudogu.Truststore
- 
- def truststore = new com.cloudogu.Truststore(this, '/path/to/alternative/truststore.jks', 'mytruststore-alpha.jks')
- 
- node('master') {
-     truststore.copy()
- }
- node('anotherOne') {
-     //use the truststore
-     //javaAppRun -Djavax.net.ssl.trustStore=./mytruststore-alpha.jks -Djavax.net.ssl.trustStorePassword=thatOtherPassword 
-     
-     truststore.remove()
- }
- ```
+```
+Library ('zalenium-build-lib') _
+
+node('master') {
+    truststore.copy('/path/to/alternative/truststore/file.jks')
+}
+node('anotherOne') {
+    //truststore.use ... as usual
+}
+```
 
 ## Locking
 
