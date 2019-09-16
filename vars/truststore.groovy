@@ -18,16 +18,6 @@ def copy(String pathToTruststore = '/var/lib/jenkins/truststore.jks') {
  *
  * <code>truststore.copy()</code> MUST be called beforehand, otherwise there would be no truststore to be unstashed.
  *
- * <pre>
- *     node 'master' {
- *      truststore.copy()
- *     }
- *     node 'docker' {
- *         truststore.use { 
- *             javaOrMvn "-Djavax.net.ssl.trustStore=truststore.jks -Djavax.net.ssl.trustStorePassword=changeit"
- *         }
- *     }
- * </pre>
  * @param closure this closure is executed after the truststore was successfully unstashed.
  */
 def use(Closure inner) {
