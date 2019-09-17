@@ -101,7 +101,7 @@ Library ('zalenium-build-lib') _
 node('master') {
     truststore.copy('/path/to/alternative/truststore/file.jks')
 }
-node('anotherOne') {
+node('anotherNode') {
     //truststore.use ... as usual
 }
 ```
