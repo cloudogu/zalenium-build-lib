@@ -63,6 +63,49 @@ It is possible (although not necessary) to explicitly work with docker networks.
 
 ```
 
+## Working with Truststores
+
+Often comes a Truststore into play while working with Jenkins and Java. Jenkins can accommodate necessary certificates in its truststore so Java applications like Maven (and others too!) can successfully interact with other parties, like download artifacts from artifact repositories or transport data over the network. Even so, it may be necessary to provide these Java applications with the right certificates when otherwise encrypted communication would fail without doing so.
+
+## Simple Truststore pipeline
+
+For such circumstances this library provides a small snippet. The global `truststore` variable ensures that any truststore files which are copied in the process are also removed at the end of both `copy` and `use` actions.
+
+In order to successfully provide a truststore to any Java process this sequence must be in order:
+
+1. copy the truststore with `truststore.copy()`   
+1. use the copied truststore with `truststore.use { truststoreFile -> }`
+
+Here is a more elaborate example:
+ 
+```
+Library ('zalenium-build-lib') _
+
+node 'master' {
+    truststore.copy()
+}
+node 'docker' {
+    truststore.use { truststoreFile ->
+        javaOrMvn "-Djavax.net.ssl.trustStore=${truststoreFile} -Djavax.net.ssl.trustStorePassword=changeit"
+    }
+}
+```
+
+## Alternative Ways of Configuration
+
+It is possible to supply a different truststore than the Jenkins one. Also it is possible to provide a different name in order to avoid filename collision:
+
+```
+Library ('zalenium-build-lib') _
+
+node('master') {
+    truststore.copy('/path/to/alternative/truststore/file.jks')
+}
+node('anotherNode') {
+    //truststore.use ... as usual
+}
+```
+
 ## Locking
 
 Right now, only one Job can run Zalenium Tests at a time.
