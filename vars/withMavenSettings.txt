@@ -1,4 +1,4 @@
-provides more sophisticated Maven support for custom `settings.xml` files which refer central maven mirror to in the
+Provides sophisticated Maven support for custom `settings.xml` files which refer to a central maven mirror in the
 context of a Cloudogu EcoSystem. This global variable writes custom `settings.xml` files and can additionally invoke a
 provided or custom Maven call.
 
@@ -11,15 +11,15 @@ Once written, the `settings.xml`'s structure will look like this:
 |   +-> localRepository
 |   `-> servers
 |        `-> server
-|             +-> id
-|             +-> username
-|             `-> password
+|             +-> id (generated with FQDN)
+|             +-> username (taken from credentials)
+|             `-> password (taken from credentials)
 |
 `-> mirrors
      `-> mirror
           +-> id (reference to the server id)
-          +-> name
-          +-> url
+          +-> name (generated from FQDN)
+          +-> url (generated from FQDN)
           +-> mirrorOf (fixed value of central maven mirror)
 
 Example call:

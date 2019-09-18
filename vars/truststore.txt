@@ -1,4 +1,4 @@
-Starts copies and provides a truststore files for safe use over different Jenkins nodes. When the build job finishes there
+Copies and provides a truststore file for safe use over different Jenkins nodes. When the build job finishes there
 will be no truststore file left in the Jenkins workspace.
 
 By default Jenkins's truststore will be used: `/var/lib/jenkins/truststore.jks`
