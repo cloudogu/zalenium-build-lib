@@ -51,7 +51,7 @@ def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenReposi
 def mvnWithSettings(def nexusCredentials, String cesFQDN, String mvnCallArgs) {
     def currentHome = env.HOME
     settings(nexusCredentials, cesFQDN, currentHome) { settingsXml ->
-        mvnPure settingsXml, mvnCallArgs
+        mvn settingsXml, mvnCallArgs
     }
 }
 
