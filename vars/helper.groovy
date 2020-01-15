@@ -1,5 +1,5 @@
 String generateZaleniumJobName() {
-    return "${JOB_BASE_NAME}_${BUILD_NUMBER}"
+    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 String findHostName() {
