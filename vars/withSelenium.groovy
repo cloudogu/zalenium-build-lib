@@ -50,7 +50,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     if (seleniumNetwork != null && !seleniumNetwork.isEmpty()) {
         networkParameter = "--network ${seleniumNetwork}"
     }
-    //todo create picture folder
 
     gridDebugParameter = ""
     if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
@@ -176,31 +175,37 @@ private Collection<String> runWorkerNodes(GString workerNodeImage, String hubHos
 }
 
 void stopSeleniumSession(String seleniumHubID, Collection<String> firefoxIDs, Collection<String> chromeIDs) {
-    //TODO RICHTIGMACHEN firefoxIDs.toArray()
+    String[] firefoxContainerIDs = firefoxIDs.toArray()
+    String[] chromeContainerIDs = chromeIDs.toArray()
 
     echo "Stopping Firefox containers..."
-    stopAndLogContainers(firefoxIDs)
+    stopAndLogContainers(firefoxContainerIDs)
 
     echo "Stopping Chrome containers..."
-    stopAndLogContainers(chromeIDs)
+    stopAndLogContainers(chromeContainerIDs)
 
-    // Stop container gracefully and wait
-    sh "docker stop ${seleniumHubID}"
-    // Store log for debugging purposes
-    sh "docker logs ${seleniumHubID} > selenium-docker.log 2>&1"
+    echo "Stopping selenium hub..."
+    stopAndLogContainers(seleniumHubID)
 
     echo "Remove containers..."
-    removeContainers(firefoxIDs)
-    removeContainers(chromeIDs)
-    sh "docker rm -f ${seleniumHubID}"
+    removeContainers(firefoxContainerIDs)
+    removeContainers(chromeContainerIDs)
+    removeContainers(seleniumHubID)
 }
 
-private void stopAndLogContainers(Collection<String> containerIDs) {
+private void stopAndLogContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Stopping container with ID ${containerId}"
         sh "docker stop ${containerId}"
 
         echo "Container with ID ${containerId} produced these logs:"
         sh "docker logs ${containerId} > selenium-docker.log 2>&1"
+    }
+}
+
+private void removeContainers(String... containerIDs) {
+    for (String containerId : containerIDs) {
+        echo "Removing container with ID ${containerId}"
+        sh "docker rm -f ${containerId}"
     }
 }
