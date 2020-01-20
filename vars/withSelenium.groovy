@@ -27,7 +27,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             debugSelenium     : false,
             seleniumPictureDir: "selenium"
     ]
-
+    println "in closure"
     // Merge default config with the one passed as parameter
     config = defaultConfig << config
     if (config.firefoxWorkerCount == 0 && config.chromeWorkerCount == 0) {
@@ -64,6 +64,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
                     "${gridDebugParameter} " +
                     "--name ${hubName}"
     ) { hubContainer ->
+        println "in withRun"
         String seleniumIp = findContainerIp(hubContainer)
 
         def firefoxContainers = startFirefoxWorker(hubName, config.workerImageTag, config.firefoxWorkerCount)
