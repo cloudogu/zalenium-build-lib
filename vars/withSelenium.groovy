@@ -142,33 +142,33 @@ class ConfigurationException extends RuntimeException {
     }
 }
 
-private Collection<String> startFirefoxWorker(String hubHost, String networkName, String workerImageTag, int count) {
+private ArrayList<String> startFirefoxWorker(String hubHost, String networkName, String workerImageTag, int count) {
     def workerNodeImage = "selenium/node-firefox:${workerImageTag}"
 
     return runWorkerNodes(workerNodeImage, networkName, hubHost, count)
 }
 
-private Collection<String> startChromeWorker(String hubHost, String networkName, String workerImageTag, int count) {
+private ArrayList<String> startChromeWorker(String hubHost, String networkName, String workerImageTag, int count) {
     def workerNodeImage = "selenium/node-chrome:${workerImageTag}"
 
     return runWorkerNodes(workerNodeImage, networkName, hubHost, count)
 }
 
-private Collection<String> runWorkerNodes(GString workerNodeImage, String networkName, String hubHost, int count) {
+private ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkName, String hubHost, int count) {
     echo "Starting worker node with docker image ${workerNodeImage}"
 
     def workerImage = docker.image(workerNodeImage)
     workerImage.pull()
     dockerDefaultArgs = "-d --net ${networkName} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm selenium/node-chrome"
-
+    ArrayList<String> workerIDList = []
     for (int i = 0; i < count; i++) {
         container = workerImage.run()
-        list.add(container.id)
+        workerIDList << container.id
     }
-    return list
+    return workerIDList
 }
 
-void stopSeleniumSession(String seleniumHubID, Collection<String> firefoxIDs, Collection<String> chromeIDs) {
+void stopSeleniumSession(String seleniumHubID, ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
     String[] firefoxContainerIDs = firefoxIDs.toArray()
     String[] chromeContainerIDs = chromeIDs.toArray()
 
