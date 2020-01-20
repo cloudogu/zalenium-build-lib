@@ -27,7 +27,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             debugSelenium     : false,
             seleniumPictureDir: "selenium"
     ]
-    println "in closure"
+
     // Merge default config with the one passed as parameter
     config = defaultConfig << config
     if (config.firefoxWorkerCount == 0 && config.chromeWorkerCount == 0) {
@@ -64,11 +64,10 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
                     "${gridDebugParameter} " +
                     "--name ${hubName}"
     ) { hubContainer ->
-        println "in withRun"
         String seleniumIp = findContainerIp(hubContainer)
 
-        def firefoxContainers = startFirefoxWorker(hubName, config.workerImageTag, config.firefoxWorkerCount)
-        def chromeContainers = startChromeWorker(hubName, config.workerImageTag, config.chromeWorkerCount)
+        def firefoxContainers = startFirefoxWorker(hubName, seleniumNetwork, config.workerImageTag, config.firefoxWorkerCount)
+        def chromeContainers = startChromeWorker(hubName, seleniumNetwork, config.workerImageTag, config.chromeWorkerCount)
 
         try {
             waitForSeleniumToGetReady(seleniumIp)
@@ -137,24 +136,24 @@ class ConfigurationException extends RuntimeException {
     }
 }
 
-private Collection<String> startFirefoxWorker(String hubHost, String workerImageTag, int count) {
+private Collection<String> startFirefoxWorker(String hubHost, String networkName, String workerImageTag, int count) {
     def workerNodeImage = "selenium/node-firefox:${workerImageTag}"
 
-    return runWorkerNodes(workerNodeImage, hubHost, count)
+    return runWorkerNodes(workerNodeImage, networkName, hubHost, count)
 }
 
-private Collection<String> startChromeWorker(String hubHost, String workerImageTag, int count) {
+private Collection<String> startChromeWorker(String hubHost, String networkName, String workerImageTag, int count) {
     def workerNodeImage = "selenium/node-chrome:${workerImageTag}"
 
-    return runWorkerNodes(workerNodeImage, hubHost, count)
+    return runWorkerNodes(workerNodeImage, networkName, hubHost, count)
 }
 
-private Collection<String> runWorkerNodes(GString workerNodeImage, String hubHost, int count) {
+private Collection<String> runWorkerNodes(GString workerNodeImage, String networkName, String hubHost, int count) {
     echo "Starting worker node with docker image ${workerNodeImage}"
 
     def workerImage = docker.image(workerNodeImage)
     workerImage.pull()
-    dockerDefaultArgs = "-d --net grid -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm selenium/node-chrome"
+    dockerDefaultArgs = "-d --net ${networkName} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm selenium/node-chrome"
 
     for (int i = 0; i < count; i++) {
         container = workerImage.run()
