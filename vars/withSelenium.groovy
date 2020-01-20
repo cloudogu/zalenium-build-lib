@@ -49,7 +49,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         networkParameter = "--network ${seleniumNetwork}"
     }
 
-    checkNetwork(seleniumNetwork)
+    createNetworkIfNotExists(seleniumNetwork)
 
     gridDebugParameter = ""
     if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
@@ -77,6 +77,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             closure.call(hubContainer, seleniumIp, uid, gid)
         } finally {
             stopSeleniumSession(hubContainer.id, firefoxContainers, chromeContainers)
+            removeNetwork(seleniumNetwork)
         }
     }
 }
@@ -204,9 +205,16 @@ private void removeContainers(String... containerIDs) {
     }
 }
 
-private void checkNetwork(String networkName) {
+private void createNetworkIfNotExists(String networkName) {
     Boolean networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
-    if(!networkExists) {
+    if (!networkExists) {
         sh(returnStatus: true, script: "docker network create ${networkName}")
+    }
+}
+
+private void removeNetwork(String networkName) {
+    Boolean networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
+    if (!networkExists) {
+        sh(returnStatus: true, script: "docker network rm ${networkName}")
     }
 }
