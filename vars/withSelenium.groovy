@@ -54,7 +54,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         gridDebugParameter = "-e GRID_DEBUG=true"
     }
 
-    String hubName = generateZaleniumJobName() + "-seleniumhub"
+    String hubName = generateSeleniumJobName() + "-seleniumhub"
 
     seleniumHubImage.withRun(
             // Run with Jenkins user, so the files created in the workspace by zalenium can be deleted later
@@ -77,6 +77,10 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             stopSeleniumSession(hubContainer.id, firefoxContainers, chromeContainers)
         }
     }
+}
+
+private String generateSeleniumJobName() {
+    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 private void checkSeleniumVersionCompatibility(String seleniumVersion, String workerImageTag) {
