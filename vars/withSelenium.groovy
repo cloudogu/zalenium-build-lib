@@ -49,6 +49,8 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         networkParameter = "--network ${seleniumNetwork}"
     }
 
+    checkNetwork(seleniumNetwork)
+
     gridDebugParameter = ""
     if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
         gridDebugParameter = "-e GRID_DEBUG=true"
@@ -199,5 +201,12 @@ private void removeContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Removing container with ID ${containerId}"
         sh "docker rm -f ${containerId}"
+    }
+}
+
+private void checkNetwork(String networkName) {
+    Boolean networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
+    if(!networkExists) {
+        sh(returnStatus: true, script: "docker network create ${networkName}")
     }
 }
