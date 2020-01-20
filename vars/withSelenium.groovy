@@ -162,7 +162,7 @@ private ArrayList<String> runWorkerNodes(GString workerNodeImage, String network
     dockerDefaultArgs = "--net ${networkName} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
     ArrayList<String> workerIDList = []
     for (int i = 0; i < count; i++) {
-        container = workerImage.runWith(dockerDefaultArgs)
+        container = workerImage.run(dockerDefaultArgs)
         workerIDList << container.id
     }
     return workerIDList
