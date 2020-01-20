@@ -19,8 +19,8 @@
 void call(Map config = [:], String seleniumNetwork, Closure closure) {
 
     def defaultConfig = [
-            seleniumImage     : 'elgalu/selenium',
-            seleniumVersion   : "3.141.59-p8",
+            seleniumImage     : 'selenium/hub',
+            seleniumHubVersion: "3.141.59-zinc",
             workerImageTag    : "3.141.59-zinc",
             firefoxWorkerCount: 0,
             chromeWorkerCount : 0,
@@ -34,14 +34,12 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         throw new ConfigurationException("Cannot start selenium test. Please configure at least one workerCount for the desired browser.")
     }
 
-    checkSeleniumVersionCompatibility(config.seleniumVersion, config.workerImageTag)
-
-    sh "mkdir -p ${config.zaleniumVideoDir}"
+    checkSeleniumVersionCompatibility(config.seleniumHubVersion, config.workerImageTag)
 
     // explicitly pull the image into the registry. The documentation is not fully clear but it seems that pull()
     // will persist the image in the registry better than an docker.image(...).runWith()
-    def seleniumImage = docker.image("${config.seleniumImage}:${config.seleniumVersion}")
-    seleniumImage.pull()
+    def seleniumHubImage = docker.image("${config.seleniumImage}:${config.seleniumHubVersion}")
+    seleniumHubImage.pull()
 
     def uid = findUid()
     def gid = findGid()
@@ -58,7 +56,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
 
     String hubName = generateZaleniumJobName() + "-seleniumhub"
 
-    seleniumImage.withRun(
+    seleniumHubImage.withRun(
             // Run with Jenkins user, so the files created in the workspace by zalenium can be deleted later
             // Otherwise that would be root, and you know how hard it is to get rid of root-owned files.
             "-u ${uid}:${gid} " +
@@ -125,16 +123,6 @@ boolean isSeleniumReady(String host) {
     sh(returnStdout: true,
             script: "curl -sSL http://${host}:4444/wd/hub/status || true") // Don't fail
             .contains('ready\": true')
-}
-
-void waitForSeleniumSessionsToEnd(String host) {
-    timeout(time: 5, unit: 'MINUTES') {
-        echo "Waiting for selenium sessions to end at http://${host}"
-        while (isSeleniumSessionsActive(host)) {
-            sleep(time: 10, unit: 'SECONDS')
-        }
-        echo "No more selenium sessions active at http://${host}"
-    }
 }
 
 boolean isSeleniumSessionsActive(String host) {
