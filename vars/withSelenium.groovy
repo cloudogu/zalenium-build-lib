@@ -214,7 +214,7 @@ private void createNetworkIfNotExists(String networkName) {
 
 private void removeNetwork(String networkName) {
     Boolean networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
-    if (!networkExists) {
+    if (networkExists) {
         sh(returnStatus: true, script: "docker network rm ${networkName}")
     }
 }
