@@ -185,7 +185,7 @@ void stopSeleniumSession(String seleniumHubID, ArrayList<String> firefoxIDs, Col
     echo "Remove containers..."
     removeContainers(firefoxContainerIDs)
     removeContainers(chromeContainerIDs)
-    removeContainers(seleniumHubID)
+//    removeContainers(seleniumHubID)
 }
 
 private void stopAndLogContainers(String... containerIDs) {
