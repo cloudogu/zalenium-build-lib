@@ -23,8 +23,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             workerImageTag    : "3.141.59-zinc",
             firefoxWorkerCount: 0,
             chromeWorkerCount : 0,
-            debugSelenium     : false,
-            seleniumPictureDir: "selenium"
+            debugSelenium     : false
     ]
 
     // Merge default config with the one passed as parameter
@@ -47,8 +46,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     if (seleniumNetwork != null && !seleniumNetwork.isEmpty()) {
         networkParameter = "--network ${seleniumNetwork}"
     }
-
-    createNetworkIfNotExists(seleniumNetwork)
 
     gridDebugParameter = ""
     if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
@@ -76,7 +73,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             closure.call(hubContainer, seleniumIp, uid, gid)
         } finally {
             stopSeleniumSession(hubContainer.id, firefoxContainers, chromeContainers)
-            removeNetwork(seleniumNetwork)
         }
     }
 }
@@ -131,11 +127,6 @@ boolean isSeleniumReady(String host) {
             .contains('ready\": true')
 }
 
-boolean isSeleniumSessionsActive(String host) {
-    sh(returnStatus: true,
-            script: "(curl -sSL http://${host}:4444/grid/api/sessions || true) | grep sessions") == 0
-}
-
 class ConfigurationException extends RuntimeException {
     ConfigurationException(String message) {
         super(message)
@@ -143,13 +134,13 @@ class ConfigurationException extends RuntimeException {
 }
 
 private ArrayList<String> startFirefoxWorker(String hubHost, String networkName, String workerImageTag, int count) {
-    def workerNodeImage = "selenium/node-firefox:${workerImageTag}"
+    GString workerNodeImage = "selenium/node-firefox:${workerImageTag}"
 
     return runWorkerNodes(workerNodeImage, networkName, hubHost, count)
 }
 
 private ArrayList<String> startChromeWorker(String hubHost, String networkName, String workerImageTag, int count) {
-    def workerNodeImage = "selenium/node-chrome:${workerImageTag}"
+    GString workerNodeImage = "selenium/node-chrome:${workerImageTag}"
 
     return runWorkerNodes(workerNodeImage, networkName, hubHost, count)
 }
@@ -168,7 +159,7 @@ private ArrayList<String> runWorkerNodes(GString workerNodeImage, String network
     return workerIDList
 }
 
-void stopSeleniumSession(String seleniumHubID, ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
+void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
     String[] firefoxContainerIDs = firefoxIDs.toArray()
     String[] chromeContainerIDs = chromeIDs.toArray()
 
@@ -178,13 +169,9 @@ void stopSeleniumSession(String seleniumHubID, ArrayList<String> firefoxIDs, Col
     echo "Stopping Chrome containers..."
     stopAndLogContainers(chromeContainerIDs)
 
-    echo "Stopping selenium hub..."
-    stopAndLogContainers(seleniumHubID)
-
     echo "Remove containers..."
     removeContainers(firefoxContainerIDs)
     removeContainers(chromeContainerIDs)
-//    removeContainers(seleniumHubID)
 }
 
 private void stopAndLogContainers(String... containerIDs) {
@@ -201,19 +188,5 @@ private void removeContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Removing container with ID ${containerId}"
         sh "docker rm -f ${containerId}"
-    }
-}
-
-private void createNetworkIfNotExists(String networkName) {
-    Boolean networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
-    if (!networkExists) {
-        sh(returnStatus: true, script: "docker network create ${networkName}")
-    }
-}
-
-private void removeNetwork(String networkName) {
-    Boolean networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
-    if (networkExists) {
-        sh(returnStatus: true, script: "docker network rm ${networkName}")
     }
 }
