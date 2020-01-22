@@ -147,8 +147,8 @@ private ArrayList<String> runWorkerNodes(GString workerNodeImage, String network
 
     def workerImage = docker.image(workerNodeImage)
     workerImage.pull()
-    def networkParameter = getNetworkParam(networkName)
-    dockerDefaultArgs = "${networkParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
+    String networkParameter = getNetworkParam(networkName)
+    GString dockerDefaultArgs = "${networkParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
     ArrayList<String> workerIDList = []
     for (int i = 0; i < count; i++) {
         container = workerImage.run(dockerDefaultArgs)
@@ -157,7 +157,7 @@ private ArrayList<String> runWorkerNodes(GString workerNodeImage, String network
     return workerIDList
 }
 
-void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
+private static void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
     String[] firefoxContainerIDs = firefoxIDs.toArray()
     String[] chromeContainerIDs = chromeIDs.toArray()
 
@@ -172,7 +172,7 @@ void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chrome
     removeContainers(chromeContainerIDs)
 }
 
-private void stopAndLogContainers(String... containerIDs) {
+private static void stopAndLogContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Stopping container with ID ${containerId}"
         sh "docker stop ${containerId}"
@@ -182,7 +182,7 @@ private void stopAndLogContainers(String... containerIDs) {
     }
 }
 
-private void removeContainers(String... containerIDs) {
+private static void removeContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Removing container with ID ${containerId}"
         sh "docker rm -f ${containerId}"
@@ -193,6 +193,17 @@ private String getNetworkParam(String networkName) {
     def networkParameter = ""
     if (networkName != null && !networkName.isEmpty()) {
         networkParameter = "--network ${networkName}"
+    } else { // create default network
+        createNetworkIfNotExists("selenium-grid")
     }
     return networkParameter
+}
+
+private static void createNetworkIfNotExists(String networkName) {
+    Boolean networkExists = sh(returnStdout: true,
+            script: "docker network ls | grep ${networkName}") == 0
+    if(!networkExists) {
+        sh(returnStdout: true,
+                script: "docker network create networkName")
+    }
 }
