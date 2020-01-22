@@ -28,6 +28,8 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             debugSelenium     : false
     ]
 
+    checkNetwork(seleniumNetwork)
+
     // Merge default config with the one passed as parameter
     config = defaultConfig << config
     if (config.firefoxWorkerCount == 0 && config.chromeWorkerCount == 0) {
@@ -44,7 +46,10 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     def uid = findUid()
     def gid = findGid()
 
-    networkParameter = getNetworkParam(seleniumNetwork)
+    def networkParameter = ""
+    if (networkName != null && !networkName.isEmpty()) {
+        networkParameter = "--network ${networkName}"
+    }
 
     gridDebugParameter = ""
     if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
@@ -190,24 +195,9 @@ void removeContainers(String... containerIDs) {
     }
 }
 
-GString getNetworkParam(String networkName) {
-    if (networkName != null && !networkName.isEmpty()) {
-        return "--network ${networkName}"
-    } else { // create default network
-        String defaultNetworkName = "selenium-grid"
-        createNetworkIfNotExists(defaultNetworkName)
-        return "--network ${defaultNetworkName}"
-    }
-}
-
-void createNetworkIfNotExists(String networkName) {
-    def networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName}") == 0
-    if (networkExists) {
-        println("network ${networkName} already exists")
-        return
-    }
-    def networkCreated = sh(returnStdout: true, script: "docker network create ${networkName}") == 0
-    if (!networkCreated) {
-        println("failed to create docker network ${networkName}")
+void checkNetwork(String networkName) {
+    def networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
+    if(!networkExists) {
+        throw new ConfigurationException("the given network '${networkName}' does not exist but is mandatory when using selenium grid")
     }
 }
