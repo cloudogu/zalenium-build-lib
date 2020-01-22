@@ -15,8 +15,9 @@
  * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
  * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>
  * @param pathToLocalMavenRepository without the .m2 directory part, f. i. <code>/usr/share/maven</code>. The suffix <code>/.m2/repository</code> will be added automatically.
+ * @param mirrorNexusPath relativ path to a maven central mirror hosted inside a nexus instance. The suffix <code>/nexus/repository</code> will be added automatically.
  */
-def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, Closure closure) {
+def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String mirrorNexusPath, Closure closure) {
     echo "write settings.xml to ${pathToLocalMavenRepository}"
     String settingsXml = "settings.xml"
     withCredentials([nexusCredentials]) {
@@ -34,7 +35,7 @@ def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenReposi
                     <mirror>
                       <id>${cesFQDN}</id>
                       <name>${cesFQDN} Central Mirror</name>
-                      <url>https://${cesFQDN}/nexus/repository/itzbundshared/</url>
+                      <url>https://${cesFQDN}/nexus/repository/${mirrorNexusPath}/</url>
                       <mirrorOf>central</mirrorOf>
                     </mirror>
                 </mirrors>
@@ -50,7 +51,7 @@ def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenReposi
 
 def mvnWithSettings(def nexusCredentials, String cesFQDN, String mvnCallArgs) {
     def currentHome = env.HOME
-    settings(nexusCredentials, cesFQDN, currentHome) { settingsXml ->
+    settings(nexusCredentials, cesFQDN, currentHome, "maven-central/") { settingsXml ->
         mvn settingsXml, mvnCallArgs
     }
 }
@@ -65,7 +66,12 @@ def mvn(String settingsXml, String mvnCallArgs) {
 }
 
 def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String mvnCallArgs) {
-    settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository) { settingsXml ->
+    settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository, "maven-central/") { settingsXml ->
+        mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
+    }
+}
+def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String customMirror, String mvnCallArgs){
+    settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository, customMirror) { settingsXml ->
         mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
     }
 }
