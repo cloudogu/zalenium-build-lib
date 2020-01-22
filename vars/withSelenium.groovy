@@ -202,11 +202,12 @@ private GString getNetworkParam(String networkName) {
 }
 
 private void createNetworkIfNotExists(String networkName) {
-    def networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName}") == 0
-    if(!networkExists) {
-        def networkCreated = sh(returnStdout: true, script: "docker network create ${networkName}") == 0
-        if (!networkCreated) {
-            println("failed to create docker network ${networkName}")
-        }
+    def networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName} || true") == 0
+    if (networkExists) {
+        return
+    }
+    def networkCreated = sh(returnStdout: true, script: "docker network create ${networkName}") == 0
+    if (!networkCreated) {
+        println("failed to create docker network ${networkName}")
     }
 }
