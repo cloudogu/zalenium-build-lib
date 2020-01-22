@@ -200,8 +200,8 @@ private GString getNetworkParam(String networkName) {
     }
 }
 
-private void createNetworkIfNotExists(String networkName) {
-    def networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName} || true") == 0
+void createNetworkIfNotExists(String networkName) {
+    def networkExists = sh(returnStdout: true, script: "docker network ls") == 0
     if (networkExists) {
         return
     }
