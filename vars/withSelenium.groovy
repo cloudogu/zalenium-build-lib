@@ -42,10 +42,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     def uid = findUid()
     def gid = findGid()
 
-    networkParameter = ""
-    if (seleniumNetwork != null && !seleniumNetwork.isEmpty()) {
-        networkParameter = "--network ${seleniumNetwork}"
-    }
+    networkParameter = getNetworkParam(seleniumNetwork)
 
     gridDebugParameter = ""
     if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
@@ -150,7 +147,8 @@ private ArrayList<String> runWorkerNodes(GString workerNodeImage, String network
 
     def workerImage = docker.image(workerNodeImage)
     workerImage.pull()
-    dockerDefaultArgs = "--net ${networkName} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
+    def networkParameter = getNetworkParam(networkName)
+    dockerDefaultArgs = "${networkParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
     ArrayList<String> workerIDList = []
     for (int i = 0; i < count; i++) {
         container = workerImage.run(dockerDefaultArgs)
@@ -189,4 +187,12 @@ private void removeContainers(String... containerIDs) {
         echo "Removing container with ID ${containerId}"
         sh "docker rm -f ${containerId}"
     }
+}
+
+private String getNetworkParam(String networkName) {
+    def networkParameter = ""
+    if (networkName != null && !networkName.isEmpty()) {
+        networkParameter = "--network ${networkName}"
+    }
+    return networkParameter
 }
