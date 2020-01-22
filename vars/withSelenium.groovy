@@ -157,7 +157,7 @@ private ArrayList<String> runWorkerNodes(GString workerNodeImage, String network
     return workerIDList
 }
 
-private static void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
+private void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
     String[] firefoxContainerIDs = firefoxIDs.toArray()
     String[] chromeContainerIDs = chromeIDs.toArray()
 
@@ -172,7 +172,7 @@ private static void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection
     removeContainers(chromeContainerIDs)
 }
 
-private static void stopAndLogContainers(String... containerIDs) {
+private void stopAndLogContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Stopping container with ID ${containerId}"
         sh "docker stop ${containerId}"
@@ -182,7 +182,7 @@ private static void stopAndLogContainers(String... containerIDs) {
     }
 }
 
-private static void removeContainers(String... containerIDs) {
+private void removeContainers(String... containerIDs) {
     for (String containerId : containerIDs) {
         echo "Removing container with ID ${containerId}"
         sh "docker rm -f ${containerId}"
@@ -199,7 +199,7 @@ private String getNetworkParam(String networkName) {
     return networkParameter
 }
 
-private static void createNetworkIfNotExists(String networkName) {
+private void createNetworkIfNotExists(String networkName) {
     Boolean networkExists = sh(returnStdout: true,
             script: "docker network ls | grep ${networkName}") == 0
     if(!networkExists) {
