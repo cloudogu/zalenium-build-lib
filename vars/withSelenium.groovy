@@ -1,3 +1,5 @@
+import org.codehaus.groovy.runtime.dgmimpl.arrays.BooleanArrayGetAtMetaMethod
+
 /**
  * Starts a Selenium grid and executes the given body. When the body finishes, the Selenium containers will
  * gracefully shutdown.
@@ -189,18 +191,18 @@ private void removeContainers(String... containerIDs) {
     }
 }
 
-private String getNetworkParam(String networkName) {
-    def networkParameter = ""
+private GString getNetworkParam(String networkName) {
     if (networkName != null && !networkName.isEmpty()) {
-        networkParameter = "--network ${networkName}"
+        return "--network ${networkName}"
     } else { // create default network
-        createNetworkIfNotExists("selenium-grid")
+        String defaultNetworkName = "selenium-grid"
+        createNetworkIfNotExists(defaultNetworkName)
+        return "--network ${defaultNetworkName}"
     }
-    return networkParameter
 }
 
 private void createNetworkIfNotExists(String networkName) {
-    Boolean networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName}") == 0
+    def networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName}") == 0
     if(!networkExists) {
         sh(returnStdout: true, script: "docker network create ${networkName}")
     }
