@@ -1,4 +1,4 @@
-- generateZaleniumJobName() - creates a jobname unique to the current Jenkins job. For the 99th Jenkins build of the job
+- generateJobName() - creates a jobname unique to the current Jenkins job. For the 99th Jenkins build of the job
   "ACME" the job name would be "ACME_99".
 
 - findHostName() - returns the host name of the current Jenkins node. This is usually needed for getting the FQDN of the

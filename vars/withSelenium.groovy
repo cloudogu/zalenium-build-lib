@@ -37,18 +37,12 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     }
 
     checkSeleniumVersionCompatibility(config.seleniumHubVersion, config.workerImageTag)
-
-    // explicitly pull the image into the registry. The documentation is not fully clear but it seems that pull()
-    // will persist the image in the registry better than an docker.image(...).runWith()
-    def seleniumHubImage = docker.image("${config.seleniumImage}:${config.seleniumHubVersion}")
-    seleniumHubImage.pull()
-
     def uid = findUid()
     def gid = findGid()
 
     def networkParameter = ""
-    if (networkName != null && !networkName.isEmpty()) {
-        networkParameter = "--network ${networkName}"
+    if (seleniumNetwork != null && !seleniumNetwork.isEmpty()) {
+        networkParameter = "--network ${seleniumNetwork}"
     }
 
     gridDebugParameter = ""
@@ -56,8 +50,12 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         gridDebugParameter = "-e GRID_DEBUG=true"
     }
 
-    String hubName = generateSeleniumJobName() + "-seleniumhub"
+    String hubName = generateJobName() + "-seleniumhub"
 
+    // explicitly pull the image into the registry. The documentation is not fully clear but it seems that pull()
+    // will persist the image in the registry better than an docker.image(...).runWith()
+    def seleniumHubImage = docker.image("${config.seleniumImage}:${config.seleniumHubVersion}")
+    seleniumHubImage.pull()
     seleniumHubImage.withRun(
             // Run with Jenkins user, so the files created in the workspace by selenium can be deleted later
             // Otherwise that would be root, and you know how hard it is to get rid of root-owned files.
@@ -79,10 +77,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             stopSeleniumSession(hubContainer.id, firefoxContainers, chromeContainers)
         }
     }
-}
-
-String generateSeleniumJobName() {
-    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 void checkSeleniumVersionCompatibility(String seleniumVersion, String workerImageTag) {

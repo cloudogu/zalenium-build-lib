@@ -1,4 +1,4 @@
-String generateZaleniumJobName() {
+String generateJobName() {
     return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
