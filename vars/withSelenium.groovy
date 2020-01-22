@@ -72,7 +72,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
 
             closure.call(hubContainer, seleniumIp, uid, gid)
         } finally {
-            stopSeleniumSession(hubContainer.id, firefoxContainers, chromeContainers)
+            stopSeleniumSession(firefoxContainers, chromeContainers)
         }
     }
 }
@@ -159,7 +159,7 @@ ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkParamete
     return workerIDList
 }
 
-void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
+private void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
     String[] firefoxContainerIDs = firefoxIDs.toArray()
     String[] chromeContainerIDs = chromeIDs.toArray()
 
