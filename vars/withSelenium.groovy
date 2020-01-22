@@ -1,5 +1,3 @@
-import org.codehaus.groovy.runtime.dgmimpl.arrays.BooleanArrayGetAtMetaMethod
-
 /**
  * Starts a Selenium grid and executes the given body. When the body finishes, the Selenium containers will
  * gracefully shutdown.
@@ -77,6 +75,10 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             stopSeleniumSession(hubContainer.id, firefoxContainers, chromeContainers)
         }
     }
+}
+
+String generateJobName() {
+    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 void checkSeleniumVersionCompatibility(String seleniumVersion, String workerImageTag) {
