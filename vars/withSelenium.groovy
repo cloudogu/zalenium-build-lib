@@ -200,10 +200,8 @@ private String getNetworkParam(String networkName) {
 }
 
 private void createNetworkIfNotExists(String networkName) {
-    Boolean networkExists = sh(returnStdout: true,
-            script: "docker network ls | grep ${networkName}") == 0
+    Boolean networkExists = sh(returnStdout: true, script: "docker network ls | grep ${networkName}") == 0
     if(!networkExists) {
-        sh(returnStdout: true,
-                script: "docker network create networkName")
+        sh(returnStdout: true, script: "docker network create ${networkName}")
     }
 }
