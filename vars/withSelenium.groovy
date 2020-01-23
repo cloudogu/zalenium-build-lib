@@ -26,7 +26,10 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             debugSelenium     : false
     ]
 
-    checkNetwork(seleniumNetwork)
+    def networkExists = checkNetwork(seleniumNetwork)
+    if(!networkExists) {
+        throw new ConfigurationException("the given network '${seleniumNetwork}' does not exist but is mandatory when using selenium grid")
+    }
 
     // Merge default config with the one passed as parameter
     config = defaultConfig << config
@@ -191,9 +194,6 @@ void removeContainers(String... containerIDs) {
     }
 }
 
-void checkNetwork(String networkName) {
-    def networkExists = sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
-    if(!networkExists) {
-        throw new ConfigurationException("the given network '${networkName}' does not exist but is mandatory when using selenium grid")
-    }
+Boolean checkNetwork(String networkName) {
+    return sh(returnStatus: true, script: "docker network ls | grep ${networkName}") == 0
 }
