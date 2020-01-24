@@ -67,8 +67,8 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     ) { hubContainer ->
         String seleniumIp = findContainerIp(hubContainer)
 
-        def firefoxContainers = startFirefoxWorker(hubName, networkParameter, config.workerImageTag, config.firefoxWorkerCount)
-        def chromeContainers = startChromeWorker(hubName, networkParameter, config.workerImageTag, config.chromeWorkerCount)
+        def firefoxContainers = startFirefoxWorker(hubName, networkParameter, gridDebugParameter, config.workerImageTag, config.firefoxWorkerCount)
+        def chromeContainers = startChromeWorker(hubName, networkParameter, gridDebugParameter, config.workerImageTag, config.chromeWorkerCount)
 
         try {
             waitForSeleniumToGetReady(seleniumIp)
@@ -136,24 +136,24 @@ class ConfigurationException extends RuntimeException {
     }
 }
 
-ArrayList<String> startFirefoxWorker(String hubHost, String networkParameter, String workerImageTag, int count) {
+ArrayList<String> startFirefoxWorker(String hubHost, String networkParameter, String debugParameter, String workerImageTag, int count) {
     GString workerNodeImage = "selenium/node-firefox:${workerImageTag}"
 
-    return runWorkerNodes(workerNodeImage, networkParameter, hubHost, count)
+    return runWorkerNodes(workerNodeImage, networkParameter, debugParameter, hubHost, count)
 }
 
-ArrayList<String> startChromeWorker(String hubHost, String networkParameter, String workerImageTag, int count) {
+ArrayList<String> startChromeWorker(String hubHost, String networkParameter, String debugParameter, String workerImageTag, int count) {
     GString workerNodeImage = "selenium/node-chrome:${workerImageTag}"
 
-    return runWorkerNodes(workerNodeImage, networkParameter, hubHost, count)
+    return runWorkerNodes(workerNodeImage, networkParameter, debugParameter, hubHost, count)
 }
 
-ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkParameter, String hubHost, int count) {
+ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkParameter, String debugParameter, String hubHost, int count) {
     echo "Starting worker node with docker image ${workerNodeImage}"
 
     def workerImage = docker.image(workerNodeImage)
     workerImage.pull()
-    GString dockerDefaultArgs = "${networkParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
+    GString dockerDefaultArgs = "${networkParameter} ${debugParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
     ArrayList<String> workerIDList = []
     for (int i = 0; i < count; i++) {
         container = workerImage.run(dockerDefaultArgs)
