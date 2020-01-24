@@ -35,7 +35,7 @@ def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenReposi
                     <mirror>
                       <id>${cesFQDN}</id>
                       <name>${cesFQDN} Central Mirror</name>
-                      <url>https://${cesFQDN}/nexus/repository/${mirrorNexusPath}/</url>
+                      <url>https://${cesFQDN}/nexus/repository/${mirrorNexusPath}</url>
                       <mirrorOf>central</mirrorOf>
                     </mirror>
                 </mirrors>
