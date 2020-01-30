@@ -4,9 +4,10 @@
  *
  * @param config contains a map of settings that change the Selenium behavior. Can be a partial map or even left out.
  *      The defaults are:
- *      [seleniumImage    : 'selenium/hub',
- *      seleniumHubVersion: '3.141.59-zinc',
- *      workerImageTag    : '3.141.59-zinc',
+ *      [seleniumHubImage : 'selenium/hub',
+ *      seleniumVersion   : '3.141.59-zinc',
+ *      workerImageFF     : "selenium/node-firefox",
+ *      workerImageChrome : "selenium/node-chrome",
  *      firefoxWorkerCount: 0,
  *      chromeWorkerCount : 0,
  *      debugSelenium     : false]
@@ -18,9 +19,10 @@
 void call(Map config = [:], String seleniumNetwork, Closure closure) {
 
     def defaultConfig = [
-            seleniumImage     : 'selenium/hub',
-            seleniumHubVersion: "3.141.59-zinc",
-            workerImageTag    : "3.141.59-zinc",
+            seleniumHubImage  : 'selenium/hub',
+            seleniumVersion   : "3.141.59-zinc",
+            workerImageFF     : "selenium/node-firefox",
+            workerImageChrome : "selenium/node-chrome",
             firefoxWorkerCount: 0,
             chromeWorkerCount : 0,
             debugSelenium     : false
@@ -37,7 +39,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         throw new ConfigurationException("Cannot start selenium test. Please configure at least one workerCount for the desired browser.")
     }
 
-    checkSeleniumVersionCompatibility(config.seleniumHubVersion, config.workerImageTag)
     def uid = findUid()
     def gid = findGid()
 
@@ -55,20 +56,16 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
 
     // explicitly pull the image into the registry. The documentation is not fully clear but it seems that pull()
     // will persist the image in the registry better than an docker.image(...).runWith()
-    def seleniumHubImage = docker.image("${config.seleniumImage}:${config.seleniumHubVersion}")
+    def seleniumHubImage = docker.image("${config.seleniumHubImage}:${config.seleniumVersion}")
     seleniumHubImage.pull()
-    seleniumHubImage.withRun(
-            // Run with Jenkins user, so the files created in the workspace by selenium can be deleted later
-            // Otherwise that would be root, and you know how hard it is to get rid of root-owned files.
-            "-u ${uid}:${gid} " +
-                    "${networkParameter} " +
-                    "${gridDebugParameter} " +
-                    "--name ${hubName}"
-    ) { hubContainer ->
+    // Run with Jenkins user, so the files created in the workspace by selenium can be deleted later
+    // Otherwise that would be root, and you know how hard it is to get rid of root-owned files.
+    def dockerArgs = "-u ${uid}:${gid} ${networkParameter} ${gridDebugParameter} -p 4444:4444 --name ${hubName}"
+    seleniumHubImage.withRun(dockerArgs) { hubContainer ->
         String seleniumIp = findContainerIp(hubContainer)
 
-        def firefoxContainers = startFirefoxWorker(hubName, networkParameter, gridDebugParameter, config.workerImageTag, config.firefoxWorkerCount)
-        def chromeContainers = startChromeWorker(hubName, networkParameter, gridDebugParameter, config.workerImageTag, config.chromeWorkerCount)
+        def firefoxContainers = runWorkerNodes("${config.workerImageFF}:${config.seleniumVersion}", networkParameter, gridDebugParameter, seleniumIp, config.firefoxWorkerCount)
+        def chromeContainers = runWorkerNodes("${config.workerImageChrome}:${config.seleniumVersion}", networkParameter, gridDebugParameter, seleniumIp, config.chromeWorkerCount)
 
         try {
             waitForSeleniumToGetReady(seleniumIp)
@@ -82,18 +79,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
 
 String generateJobName() {
     return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
-}
-
-void checkSeleniumVersionCompatibility(String seleniumVersion, String workerImageTag) {
-    def workerSeleniumVersion = seleniumVersion.split("-")[0]
-    def hubSeleniumVersion = workerImageTag.split("-")[0]
-
-    if (workerSeleniumVersion != hubSeleniumVersion) {
-        def warning = sprintf("The selected Selenium hub version '%s' differs from the worker version '%s'. " +
-                "You should consider the same version for both to avoid compatibility issues during the test.",
-                hubSeleniumVersion, seleniumVersion)
-        unstable(warning)
-    }
 }
 
 String findContainerIp(container) {
@@ -125,9 +110,10 @@ void waitForSeleniumToGetReady(String host) {
 }
 
 boolean isSeleniumReady(String host) {
-    sh(returnStdout: true,
-            script: "curl -sSL http://${host}:4444/wd/hub/status || true") // Don't fail
-            .contains('ready\": true')
+    def result = sh(returnStdout: true,
+            script: "curl -sSL http://${host}:4444/wd/hub/status") // Don't fail
+    //echo "result: \n${result}"
+    result.contains('ready\": true')
 }
 
 class ConfigurationException extends RuntimeException {
@@ -136,19 +122,10 @@ class ConfigurationException extends RuntimeException {
     }
 }
 
-ArrayList<String> startFirefoxWorker(String hubHost, String networkParameter, String debugParameter, String workerImageTag, int count) {
-    GString workerNodeImage = "selenium/node-firefox:${workerImageTag}"
-
-    return runWorkerNodes(workerNodeImage, networkParameter, debugParameter, hubHost, count)
-}
-
-ArrayList<String> startChromeWorker(String hubHost, String networkParameter, String debugParameter, String workerImageTag, int count) {
-    GString workerNodeImage = "selenium/node-chrome:${workerImageTag}"
-
-    return runWorkerNodes(workerNodeImage, networkParameter, debugParameter, hubHost, count)
-}
-
 ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkParameter, String debugParameter, String hubHost, int count) {
+    if (count < 1) {
+        return []
+    }
     echo "Starting worker node with docker image ${workerNodeImage}"
 
     def workerImage = docker.image(workerNodeImage)

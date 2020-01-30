@@ -1,0 +1,22 @@
+Starts a temporary Selenium hub that executes the selenium tests in the workspace.
+
+Requires Docker!
+
+(optional) Parameters:
+
+- seleniumHubImage  - the full name of the selenium hub image name including the registry. Defaults to 'selenium/hub' from hub.docker.com.
+- seleniumVersion   - version of the selenium docker images i.e. "3.141.59-zinc"
+- workerImageFF     - the full name of the selenium Firefox worker node. Defaults to "selenium/node-firefox".
+- workerImageChrome - the full name of the selenium Google Chrome worker node. Defaults to "selenium/node-chrome".
+- firefoxWorkerCount- count of the worker nodes that provide a Firefox browser
+- chromeWorkerCount - count of the worker nodes that provide a Google Chrome browser
+- debugSelenium     - makes the selenium containers write a lot more logs. Defaults to false.
+
+Exemplary calls:
+
+- withSelenium { seleniumHubContainer, seleniumIp, userid, groupid ->
+    // call your selenium tests using maven, yarn, etc.
+  }
+- withSelenium([ seleniumVersion : '3.141.59-zinc' ]) { seleniumHubContainer, seleniumIp, userid, groupid ->
+      // call your selenium tests using maven, yarn, etc.
+  }
