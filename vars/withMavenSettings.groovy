@@ -56,12 +56,19 @@ def mvnWithSettings(def nexusCredentials, String cesFQDN, String mvnCallArgs) {
     }
 }
 
+def mvnWithSettings(def nexusCredentials, String cesFQDN, String customMirror, String mvnCallArgs) {
+    def currentHome = env.HOME
+    settings(nexusCredentials, cesFQDN, currentHome, customMirror) { settingsXml ->
+        mvn settingsXml, mvnCallArgs
+    }
+}
+
 /**
  * This method extracts the Maven 3 installation from Jenkins and calls Maven with the given settings.xml and Maven arguments
  */
 def mvn(String settingsXml, String mvnCallArgs) {
     def mvnHome = tool 'M3'
-    
+
     mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
 }
 
