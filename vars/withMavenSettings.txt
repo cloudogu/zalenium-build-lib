@@ -33,15 +33,18 @@ Example call with included Maven call:
 
 withMavenSettings.mvnWithSettings(nexusCreds, 'cesinstance.stage.host.tld', 'yourMavenGoal')
 
-- settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, Closure closure) -  Writes a
-  `settings.xml` file with the given Nexus credentials and executes the closure body. This method provides a parameter
-  `settingsXml` which contains the relative file path to the 'settings.xml' file.
+- settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, Closure closure)
+  -  Writes a `settings.xml` file with the given Nexus credentials and executes the closure body.
+     This method provides a parameter `settingsXml` which contains the relative file path to the 'settings.xml' file.
 
-- mvn(String settingsXml, String mvnCallArgs) - call the Jenkins Tool Maven with a provided `settings.xml`
+- mvn(String settingsXml, String mvnCallArgs)
+  - call the Jenkins Tool Maven with a provided `settings.xml`
 
-- mvnWithSettings(def nexusCredentials, String cesFQDN, String mvnCallArgs) - call Jenkins Tool Maven wrapped within a
-  settings file. This is basically a convenience mix of `settings` and `mvn`
+- mvnWithSettings(def nexusCredentials, String cesFQDN, String mvnCallArgs)
+- mvnWithSettings(def nexusCredentials, String cesFQDN, String customMirror, String mvnCallArgs)
+  - call Jenkins Tool Maven wrapped within a settings file. This is basically a convenience mix of `settings` and `mvn`
 
-- customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String mvnCallArgs) -
-  similar to `mvnWithSettings` but calls a custom Maven installation instead. It is necessary to know about the location of
+- customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String mvnCallArgs)
+- customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String customMirror, String mvnCallArgs)
+  - similar to `mvnWithSettings` but calls a custom Maven installation instead. It is necessary to know about the location of
   the Maven installation. Calling this method can make sense if the Maven installation resides in a Docker container.
