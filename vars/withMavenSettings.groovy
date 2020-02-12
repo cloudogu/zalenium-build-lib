@@ -13,9 +13,9 @@
  * </pre>
  *
  * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
- * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>
+ * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>. The prefix <code>https://</code> will be added automatically.
  * @param pathToLocalMavenRepository without the .m2 directory part, f. i. <code>/usr/share/maven</code>. The suffix <code>/.m2/repository</code> will be added automatically.
- * @param mirrorNexusPath relativ path to a maven central mirror hosted inside a nexus instance. The suffix <code>/nexus/repository</code> will be added automatically.
+ * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically.
  */
 def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String mirrorNexusPath, Closure closure) {
     echo "write settings.xml to ${pathToLocalMavenRepository}"
