@@ -1,3 +1,17 @@
+/**
+ * @deprecated Use generateJobName() instead.
+ *
+ * @return a string containing the generated name.
+ */
+@Deprecated String generateZaleniumJobName() {
+    return generateJobName()
+}
+
+/**
+ * Generates an unique string based on the job name and the current build number.
+ *
+ * @return a string containing the generated name.
+ */
 String generateJobName() {
     return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
