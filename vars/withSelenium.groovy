@@ -25,6 +25,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             workerImageChrome : "selenium/node-chrome",
             firefoxWorkerCount: 0,
             chromeWorkerCount : 0,
+            hubPortMapping    : 4444,
             debugSelenium     : false
     ]
 
@@ -57,7 +58,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     seleniumHubImage.pull()
     // Run with Jenkins user, so the files created in the workspace by selenium can be deleted later
     // Otherwise that would be root, and you know how hard it is to get rid of root-owned files.
-    def dockerArgs = "-u ${uid}:${gid} ${networkParameter} ${gridDebugParameter} -p 4444:4444 --name ${hubName}"
+    def dockerArgs = "-u ${uid}:${gid} ${networkParameter} ${gridDebugParameter} -p 4444:${config.hubPortMapping} --name ${hubName}"
     seleniumHubImage.withRun(dockerArgs) { hubContainer ->
         String seleniumIp = findContainerIp(hubContainer)
 
@@ -65,7 +66,8 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         def chromeContainers = runWorkerNodes("${config.workerImageChrome}:${config.seleniumVersion}", networkParameter, gridDebugParameter, seleniumIp, config.chromeWorkerCount)
 
         try {
-            waitForSeleniumToGetReady(seleniumIp)
+            def seleniumHubHost = "${seleniumIp}:${config.hubPortMapping}"
+            waitForSeleniumToGetReady(seleniumHubHost)
 
             closure.call(hubContainer, seleniumIp, uid, gid)
         } finally {
@@ -104,8 +106,7 @@ void waitForSeleniumToGetReady(String host) {
 
 boolean isSeleniumReady(String host) {
     def result = sh(returnStdout: true,
-            script: "curl -sSL http://${host}:4444/wd/hub/status") // Don't fail
-    //echo "result: \n${result}"
+            script: "curl -sSL http://${host}/wd/hub/status") // Don't fail
     result.contains('ready\": true')
 }
 
@@ -119,14 +120,16 @@ ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkParamete
     if (count < 1) {
         return []
     }
-    echo "Starting worker node with docker image ${workerNodeImage}"
+    echo "Starting worker nodes with docker image ${workerNodeImage}"
 
     def workerImage = docker.image(workerNodeImage)
     workerImage.pull()
-    GString dockerDefaultArgs = "${networkParameter} ${debugParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
+    def dockerDefaultArgs = "${networkParameter} ${debugParameter} -e HUB_HOST=${hubHost} -v /dev/shm:/dev/shm"
     ArrayList<String> workerIDList = []
     for (int i = 0; i < count; i++) {
+        echo "starting new worker node #${i} with args ${dockerDefaultArgs}"
         container = workerImage.run(dockerDefaultArgs)
+        echo "started new worker node #${i} with ID ${container.id}"
         workerIDList << container.id
     }
     return workerIDList

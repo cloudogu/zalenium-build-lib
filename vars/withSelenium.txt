@@ -10,6 +10,7 @@ Requires Docker!
 - workerImageChrome - the full name of the selenium Google Chrome worker node. Defaults to "selenium/node-chrome".
 - firefoxWorkerCount- count of the worker nodes that provide a Firefox browser
 - chromeWorkerCount - count of the worker nodes that provide a Google Chrome browser
+- hubPortMapping    - the port for accessing the grid hub, defaults to 4444
 - debugSelenium     - makes the selenium containers write a lot more logs. Defaults to false.
 
 Exemplary calls:
