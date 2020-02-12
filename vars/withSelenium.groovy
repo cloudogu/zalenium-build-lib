@@ -10,6 +10,7 @@
  *      workerImageChrome : "selenium/node-chrome",
  *      firefoxWorkerCount: 0,
  *      chromeWorkerCount : 0,
+ *      hubPortMapping    : 4444
  *      debugSelenium     : false]
  * @param seleniumNetwork The Selenium grid container and its nodes will be added to this docker network. This is useful if other containers
  *      must communicate with Selenium while being in a docker network. If empty or left out, Selenium grid and nodes will stay in the
@@ -46,7 +47,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     def networkParameter = "--network ${seleniumNetwork}"
 
     gridDebugParameter = ""
-    if (debugSelenium) {
+    if (config.debugSelenium) {
         gridDebugParameter = "-e GRID_DEBUG=true"
     }
 
