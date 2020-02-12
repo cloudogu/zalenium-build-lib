@@ -1,4 +1,3 @@
-import helper
 /**
  * Start a temporary docker network so docker containers can interact even without IP address. The created network will
  * be removed automatically once the body finishes.
@@ -6,7 +5,7 @@ import helper
  * @param inner the body to be executed
   */
 void call(printDebugOutput = false, Closure inner) {
-    def networkName = "net_" + new helper().generateJobName()
+    def networkName = "net_" + generateJobName()
 
     try {
         debugOut(printDebugOutput, "create docker bridge network")
@@ -17,6 +16,10 @@ void call(printDebugOutput = false, Closure inner) {
         debugOut(printDebugOutput, "remove docker network")
         sh "docker network rm ${networkName}"
     }
+}
+
+String generateJobName() {
+    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 void debugOut(boolean printDebugOutput, String logMessage) {

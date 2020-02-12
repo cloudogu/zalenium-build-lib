@@ -1,5 +1,3 @@
-import helper
-
 /**
  * Starts a Selenium grid and executes the given body. When the body finishes, the Selenium containers will
  * gracefully shutdown.
@@ -51,7 +49,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         gridDebugParameter = "-e GRID_DEBUG=true"
     }
 
-    String hubName = new helper().generateJobName() + "-seleniumhub"
+    String hubName = generateJobName() + "-seleniumhub"
 
     // explicitly pull the image into the registry. The documentation is not fully clear but it seems that pull()
     // will persist the image in the registry better than an docker.image(...).runWith()
@@ -132,6 +130,10 @@ ArrayList<String> runWorkerNodes(GString workerNodeImage, String networkParamete
         workerIDList << container.id
     }
     return workerIDList
+}
+
+String generateJobName() {
+    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 private void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
