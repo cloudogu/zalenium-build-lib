@@ -1,11 +1,11 @@
 Provides sophisticated Maven support for custom `settings.xml` files which refer to a central maven mirror in the
 context of a Cloudogu EcoSystem. This global variable writes custom `settings.xml` files and can additionally invoke a
 provided or custom Maven call. All calls to any of the listed maven settings functions use the in nexus integrated maven
-central proxy repository if there is no other maven central mirror configured.
+central proxy repository if no other maven central mirror is configured.
 
-Any `settings.xml` being writting will be removed once the settings body is left.
+Any `settings.xml` being written will be removed once the settings body is left.
 
-Once written, the `settings.xml`'s structure will look like this:
+When written, the `settings.xml`'s structure will look like this:
 
 |
 +->settings
@@ -21,7 +21,7 @@ Once written, the `settings.xml`'s structure will look like this:
           +-> id (reference to the server id)
           +-> name (generated from FQDN)
           +-> url (generated from FQDN)
-          +-> mirrorOf (fixed value of central maven mirror)
+          +-> mirrorOf (fix value of central maven mirror)
 
 Example call:
 
