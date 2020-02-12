@@ -12,3 +12,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - signatures for `withMavenSettings` changed slightly so the maven central mirror can be configured
 - helper `generateZaleniumJobName` was renamed to `generateJobName`
+- `generateJobName` now uses `-` instead of `_` because of possible problems when used as DNS name 
