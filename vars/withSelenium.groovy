@@ -1,4 +1,4 @@
-evaluate(new File("./helper.groovy"))
+import helper
 
 /**
  * Starts a Selenium grid and executes the given body. When the body finishes, the Selenium containers will
@@ -51,7 +51,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
         gridDebugParameter = "-e GRID_DEBUG=true"
     }
 
-    String hubName = generateJobName() + "-seleniumhub"
+    String hubName = new helper().generateJobName() + "-seleniumhub"
 
     // explicitly pull the image into the registry. The documentation is not fully clear but it seems that pull()
     // will persist the image in the registry better than an docker.image(...).runWith()

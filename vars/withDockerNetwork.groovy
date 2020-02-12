@@ -1,5 +1,4 @@
-evaluate(new File("./helper.groovy"))
-
+import helper
 /**
  * Start a temporary docker network so docker containers can interact even without IP address. The created network will
  * be removed automatically once the body finishes.
@@ -7,7 +6,7 @@ evaluate(new File("./helper.groovy"))
  * @param inner the body to be executed
   */
 void call(printDebugOutput = false, Closure inner) {
-    def networkName = "net_" + generateJobName()
+    def networkName = "net_" + new helper().generateJobName()
 
     try {
         debugOut(printDebugOutput, "create docker bridge network")
