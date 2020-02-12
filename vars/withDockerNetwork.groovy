@@ -1,3 +1,5 @@
+evaluate(new File("./helper.groovy"))
+
 /**
  * Start a temporary docker network so docker containers can interact even without IP address. The created network will
  * be removed automatically once the body finishes.
@@ -22,8 +24,4 @@ void debugOut(boolean printDebugOutput, String logMessage) {
     if (printDebugOutput) {
         echo "DEBUG: " + logMessage
     }
-}
-
-String generateJobName() {
-    return "${JOB_BASE_NAME}_${BUILD_NUMBER}"
 }

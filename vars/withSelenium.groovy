@@ -1,3 +1,5 @@
+evaluate(new File("./helper.groovy"))
+
 /**
  * Starts a Selenium grid and executes the given body. When the body finishes, the Selenium containers will
  * gracefully shutdown.
@@ -42,13 +44,10 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     def uid = findUid()
     def gid = findGid()
 
-    def networkParameter = ""
-    if (seleniumNetwork != null && !seleniumNetwork.isEmpty()) {
-        networkParameter = "--network ${seleniumNetwork}"
-    }
+    def networkParameter = "--network ${seleniumNetwork}"
 
     gridDebugParameter = ""
-    if (gridDebugParameter != null && !gridDebugParameter.isEmpty()) {
+    if (debugSelenium) {
         gridDebugParameter = "-e GRID_DEBUG=true"
     }
 
@@ -75,10 +74,6 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
             stopSeleniumSession(firefoxContainers, chromeContainers)
         }
     }
-}
-
-String generateJobName() {
-    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
 String findContainerIp(container) {
