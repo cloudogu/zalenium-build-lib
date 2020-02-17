@@ -6,10 +6,12 @@
  *
  * <pre>
  * nexusCreds = usernamePassword(credentialsId: 'jenkinsNexusServiceUser', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')
- * withMavenSettings(nexusCreds, 'cesinstance.stage.host.tld', '/usr/share/maven') { settingsXml ->
+ * withMavenSettings.settings(nexusCreds, 'cesinstance.stage.host.tld', '/usr/share/maven', 'maven-central/') { settingsXml ->
  *     // do your maven call here
  *     mvn "-s ${settingsXml} test"
- * } // settings.xml will be removed automatically
+ *     // or from this library
+ *     withMavenSettings.mvn ${settingsXml}, "test"
+ *} // settings.xml will be removed automatically
  * </pre>
  *
  * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
@@ -64,7 +66,18 @@ def mvnWithSettings(def nexusCredentials, String cesFQDN, String customMirror, S
 }
 
 /**
- * This method extracts the Maven 3 installation from Jenkins and calls Maven with the given settings.xml and Maven arguments
+ * This method extracts the Maven 3 installation from Jenkins and calls Maven with the given settings.xml and Maven arguments.
+ *
+ * Example call:
+ *
+ * <pre>
+ *  withMavenSettings.settings(nexusCreds, 'cesinstance.stage.host.tld', '/usr/share/maven', 'maven-central/') { settingsXml ->
+ *      // parameter parenthesis is optional
+ *      withMavenSettings.mvn settingsXml, "clean build"
+ *      // can be written also like this
+ *      withMavenSettings.mvn(settingsXml, "clean build")
+ *  }
+ * </pre>
  */
 def mvn(String settingsXml, String mvnCallArgs) {
     def mvnHome = tool 'M3'
@@ -77,7 +90,8 @@ def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, 
         mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
     }
 }
-def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String customMirror, String mvnCallArgs){
+
+def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String customMirror, String mvnCallArgs) {
     settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository, customMirror) { settingsXml ->
         mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
     }

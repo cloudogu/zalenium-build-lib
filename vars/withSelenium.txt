@@ -21,3 +21,5 @@ Exemplary calls:
 - withSelenium([ seleniumVersion : '3.141.59-zinc' ]) { seleniumHubContainer, seleniumIp, userid, groupid ->
       // call your selenium tests using maven, yarn, etc.
   }
+
+`firefoxWorkerCount` AND `chromeWorkerCount` must not contain a value of zero ath the same time.

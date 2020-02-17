@@ -26,15 +26,16 @@ When written, the `settings.xml`'s structure will look like this:
 Example call:
 
 nexusCreds = usernamePassword(credentialsId: 'jenkinsNexusServiceUser', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')
-withMavenSettings.mvnWithSettings(nexusCreds, 'cesinstance.stage.host.tld', '/usr/share/maven') { settingsXml ->
+withMavenSettings.settings(nexusCreds, 'cesinstance.stage.host.tld', '/usr/share/maven', 'maven-central/') { settingsXml ->
     // do something with the settings.xml here
+    withMavenSettings.mvn(settingsXml, "clean build")
 } // settings.xml will be removed automatically
 
-Example call with included Maven call:
+Example call with included Maven call to the default Nexus path 'maven-central/':
 
 withMavenSettings.mvnWithSettings(nexusCreds, 'cesinstance.stage.host.tld', 'yourMavenGoal')
 
-- settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, Closure closure)
+- settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String nexusRepoName, Closure closure)
   -  Writes a `settings.xml` file with the given Nexus credentials and executes the closure body.
      This method provides a parameter `settingsXml` which contains the relative file path to the 'settings.xml' file.
 

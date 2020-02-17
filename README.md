@@ -3,15 +3,31 @@
 zalenium-build-lib
 =======
 
-Jenkins shared library that provides a step that runs a temporary [zalenium server](https://github.com/zalando/zalenium) 
-in docker container, that records videos of selenium tests. The videos are archived at the Jenkins job by this library.
+Jenkins shared library that provides a toolset for UI tests, featuring prominently [Zalenium](https://github.com/zalando/zalenium)  
+among other tools:
 
-# Usage
+1. Zalenium
+   - Zalenium is a framework on top of the famous Selenium UI test framework but adds convinient video support.
+   - a step that runs a temporary [Zalenium server](https://github.com/zalando/zalenium) in Docker container that records videos of selenium tests
+   - the videos are automatically archived at the Jenkins job by this library
+1. [Selenium Grid](https://selenium.dev/documentation/en/grid/)
+   - a step that runs a temporary Selenium Hub along with some Selenium worker nodes in Docker containers
+1. Docker network handling
+   - a step to conveniently create Docker bridge networks, unique per Jenkins run
+   - self-removing
+1. Truststore handling
+   - a pair of steps to copy a Java truststore from build node to another
+   - a good thing if you have a Java Docker container that needs to share the same set of certificates for network communication
+   - self-removing
+
+## [Working with Zalenium]
+
+### Usage
 
 In your `Jenkinsfile`
 
 ```groovy
-@Library('github.com/cloudogu/zalenium-build-lib@d8b74327') _
+@Library('github.com/cloudogu/zalenium-build-lib@versionTag') _
 
 // ...
 stage('UI Test') {
@@ -34,7 +50,7 @@ withZalenium([ seleniumVersion : '3.14.0-p15' ]) { zaleniumIp ->
  }
 ```
 
-When the build is done you can download the videos from the jenkins build and watch them.  
+When the build is done you can download the videos from the Jenkins build and watch them.  
 Even more convenient: You could watch the videos in the browser directly. This in possible if either
 
 * your Jenkins does not have a Content Security Policy (CSP), which is not recommended or
@@ -45,20 +61,103 @@ Even more convenient: You could watch the videos in the browser directly. This i
   * Or you start your Jenkins instance with   
   `-Dhudson.model.DirectoryBrowserSupport.CSP="sandbox; default-src 'none'; img-src 'self'; style-src 'self'; media-src 'self';"`
 
-## Docker Network creation
+### Attaching Test Reports to the Jenkins Build Run
+
+The resulting videos aside, you may be interested in attaching the actual test report to the Jenkins build run. Due to
+the fact that the resulting test report varies under the chosen technology stack (read: different format and location)
+the test developer is the one responsible to attach the test report to the build run. This is done as usual with the 
+[Jenkins pipeline step `archiveArtifacts`](https://jenkins.io/doc/pipeline/tour/tests-and-artifacts/).
+
+ 
+### Locking
+
+Right now, only one Job can run Zalenium Tests at a time.
+This could be improved in the future. 
+
+### Why?
+
+When multiple jobs executed we faced non-deterministic issues that the zalenium container was gone all of a sudden, 
+connections were aborted or timed out.
+
+So we implemented a lock before starting zalenium that can only be passed by one job at a time.
+It feels like this issue is gone now, but we're not sure if the lock was the proper fix.
+
+### Locking requirements
+
+We use the `lock` step of the [Lockable Resources Plugin](https://wiki.jenkins.io/display/JENKINS/Lockable+Resources+Plugin).
+
+## [Working with Selenium]
+
+For Selenium Grid to work it is vital that a Docker network is supplied (while Zalenium above may work with its own).
+If you don't want the hassle of creating a Docker network there is good news: The
+[Docker network step](#Docker Network creation) plays well into your cards. 
+
+### Usage
+
+In your `Jenkinsfile`
+
+```groovy
+@Library('github.com/cloudogu/zalenium-build-lib@versionTag') _
+
+// ...
+stage('UI Test') {
+    withDockerNetwork() { networkName ->  
+        withSelenium(networkName) { seleniumIp ->
+            // Run your build, passing ${zaleniumIp} to it
+        }
+    }
+}
+```
+
+Besides the Docker network name there are also a number of parameters that you may or may not pass to the step. 
+
+| Parameter | optional? | Default | Description |
+|-----------|-----------|---------|-------------|
+|seleniumHubImage  | optional | 'selenium/hub' | the Selenium Docker container images to be used from hub.docker.com.|
+|seleniumVersion   | optional | "3.141.59-zinc" | the Selenium Docker container image tag |
+|workerImageFF     | optional | "selenium/node-firefox" | the Selenium Firefox worker node Docker container image. This matches automatically with the given Selenium hub version. |
+|workerImageChrome | optional | "selenium/node-chrome" | the Selenium Chrome worker node Docker container image. This matches automatically with the given Selenium hub version.|
+|firefoxWorkerCount| mandatory if no Chrome worker is used | 0 | the number of Firefox containers that should be started for the test |
+|chromeWorkerCount | mandatory if no Firefox worker is used | 0 | the number of Chrome containers that should be started for the test |
+|hubPortMapping    | optional | 4444 | the port under which the Selenium Hub should be available |
+|debugSelenium     | optional | false | set to `true` if you want your Jenkins run log to be filled with debug output |
+
+Please note that `firefoxWorkerCount` AND `chromeWorkerCount` must not contain a value of zero. That would render the
+test unusable because there would no one to execute the tests. In this case the body will not be executed and a
+`ConfigurationException` will be thrown.  
+
+```groovy
+// example for starting Selenium with a certain parameter with a groovy map.
+// The rest of the parameters fallback to their defaults. 
+withSelenium([ seleniumVersion : '3.14.0-p15' ]) { seleniumIp ->
+        // Run your build, passing ${zaleniumIp} to it
+ }
+```
+
+Compared with the [Zalenium step](#Working with Zalenium) above, this Selenium step does not require locking.
+
+### Attaching Test Reports to the Jenkins Build Run
+
+The resulting videos aside, you may be interested in attaching the actual test report to the Jenkins build run. Due to
+the fact that the resulting test report varies under the chosen technology stack (read: different format and location)
+the test developer is the one responsible to attach the test report to the build run. This is done as usual with the 
+[Jenkins pipeline step `archiveArtifacts`](https://jenkins.io/doc/pipeline/tour/tests-and-artifacts/).
+
+## [Docker Network creation]
 
 It is possible (although not necessary) to explicitly work with docker networks. This library supports the automatic creation and removal of a bridge network with a unique name.
 
-### How
+### Usage
 
 `withZalenium` accepts now an optional network name the Zalenium container can attach to the given network. Conveniently a docker network can be created with this pipeline step which provides the dynamically created network name.
 
 ```
     withDockerNetwork { networkName ->
         def yourConfig = [:]
-        withZalenium(yourConfig, networkName) {}
+        withZalenium(yourConfig, networkName) {
             docker.image("foo/bar:1.2.3").withRun("--network ${network}") {
             ...
+        }
     }
 
 ```
@@ -67,7 +166,7 @@ It is possible (although not necessary) to explicitly work with docker networks.
 
 Often comes a Truststore into play while working with Jenkins and Java. Jenkins can accommodate necessary certificates in its truststore so Java applications like Maven (and others too!) can successfully interact with other parties, like download artifacts from artifact repositories or transport data over the network. Even so, it may be necessary to provide these Java applications with the right certificates when otherwise encrypted communication would fail without doing so.
 
-## Simple Truststore pipeline
+### Simple Truststore pipeline
 
 For such circumstances this library provides a small snippet. The global `truststore` variable ensures that any truststore files which are copied in the process are also removed at the end of both `copy` and `use` actions.
 
@@ -105,23 +204,6 @@ node('anotherNode') {
     //truststore.use ... as usual
 }
 ```
-
-## Locking
-
-Right now, only one Job can run Zalenium Tests at a time.
-This could be improved in the future. 
-
-### Why?
-
-When multiple jobs executed we faced non-deterministic issues that the zalenium container was gone all of a sudden, 
-connections were aborted or timed out.
-
-So we implemented a lock before starting zalenium that can only be passed by one job at a time.
-It feels like this issue is gone now, but we're not sure if the lock was the proper fix.
-
-### How?
-
-We use the `lock` step of the [Lockable Resources Plugin](https://wiki.jenkins.io/display/JENKINS/Lockable+Resources+Plugin).
 
 # Troubleshooting
 
