@@ -1,3 +1,5 @@
+final String defaultMavenCentralRepoName = "maven-central"
+
 /**
  * Provides a simple custom maven settings.xml file to current working directory with Maven Central mirror in the
  * current CES instance.
@@ -8,19 +10,22 @@
  * nexusCreds = usernamePassword(credentialsId: 'jenkinsNexusServiceUser', passwordVariable: 'PASSWORD', usernameVariable: 'USERNAME')
  * withMavenSettings.settings(nexusCreds, 'cesinstance.stage.host.tld', '/usr/share/maven', 'maven-central/') { settingsXml ->
  *     // do your maven call here
- *     mvn "-s ${settingsXml} test"
+ *     mvn "-s ${settingsXml} clean build"
  *     // or from this library
- *     withMavenSettings.mvn ${settingsXml}, "test"
+ *     withMavenSettings.mvn ${settingsXml}, "clean build"
  *} // settings.xml will be removed automatically
  * </pre>
  *
  * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
  * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>. The prefix <code>https://</code> will be added automatically.
  * @param pathToLocalMavenRepository without the .m2 directory part, f. i. <code>/usr/share/maven</code>. The suffix <code>/.m2/repository</code> will be added automatically.
- * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically.
+ * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
+ * @param closure This closure will be executed when the Maven <code>settings.xml</code> file was successfully created.
  */
-def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String mirrorNexusPath, Closure closure) {
+def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String mirrorNexusPath=defaultMavenCentralRepoName, Closure closure) {
     echo "write settings.xml to ${pathToLocalMavenRepository}"
+    echo "local Maven repository should be located at ${pathToLocalMavenRepository}/.m2/repository"
+
     String settingsXml = "settings.xml"
     withCredentials([nexusCredentials]) {
         writeFile file: settingsXml, text: """
@@ -51,22 +56,35 @@ def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenReposi
     }
 }
 
-def mvnWithSettings(def nexusCredentials, String cesFQDN, String mvnCallArgs) {
+/**
+ *  Provides a simple custom maven settings.xml file to current working directory with Maven Central mirror in the
+ *  current CES instance.
+ * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
+ * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>. The prefix <code>https://</code> will be added automatically.
+ * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
+ * @param closure This closure will be executed when the Maven <code>settings.xml</code> file was successfully created.
+ */
+def settingsWithEnvHome(def nexusCredentials, String cesFQDN, String mirrorNexusPath=defaultMavenCentralRepoName, Closure closure) {
     def currentHome = env.HOME
-    settings(nexusCredentials, cesFQDN, currentHome, "maven-central/") { settingsXml ->
-        mvn settingsXml, mvnCallArgs
-    }
+    settings(nexusCredentials, cesFQDN, currentHome, mirrorNexusPath, closure)
 }
 
-def mvnWithSettings(def nexusCredentials, String cesFQDN, String customMirror, String mvnCallArgs) {
+/**
+ * Creates a Maven <code>settings.xml</code> and executes Maven with the given arguments.
+ * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
+ * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>. The prefix <code>https://</code> will be added automatically.
+ * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
+ * @param mvnCallArgs these arguments contain the Maven arguments
+ */
+def mvnWithSettings(def nexusCredentials, String cesFQDN, String mirrorNexusPath, String mvnCallArgs) {
     def currentHome = env.HOME
-    settings(nexusCredentials, cesFQDN, currentHome, customMirror) { settingsXml ->
+    settings(nexusCredentials, cesFQDN, currentHome, mirrorNexusPath) { settingsXml ->
         mvn settingsXml, mvnCallArgs
     }
 }
 
 /**
- * This method extracts the Maven 3 installation from Jenkins and calls Maven with the given settings.xml and Maven arguments.
+ * Execute maven. This method extracts the Maven 3 installation from Jenkins and calls Maven with the given settings.xml and Maven arguments.
  *
  * Example call:
  *
@@ -78,6 +96,9 @@ def mvnWithSettings(def nexusCredentials, String cesFQDN, String customMirror, S
  *      withMavenSettings.mvn(settingsXml, "clean build")
  *  }
  * </pre>
+ *
+ * @param settingsXml the path to a Maven <code>settings.xml</code> file. (mandatory)
+ * @param mvnCallArgs these arguments contain the Maven arguments. Whether these arguments are optional or not depends on your <code>pom.xml</code>.
  */
 def mvn(String settingsXml, String mvnCallArgs) {
     def mvnHome = tool 'M3'
@@ -85,18 +106,39 @@ def mvn(String settingsXml, String mvnCallArgs) {
     mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
 }
 
+/**
+ * Creates a Maven <code>settings.xml</code> and executes Maven with the given arguments.
+ * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
+ * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>. The prefix <code>https://</code> will be added automatically.
+ * @param mvnHome the Maven home path
+ * @param pathToLocalMavenRepository the path to the local Maven repository
+ * @param mvnCallArgs these arguments contain the Maven arguments. Whether these arguments are optional or not depends on your <code>pom.xml</code>.
+ */
 def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String mvnCallArgs) {
-    settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository, "maven-central/") { settingsXml ->
+    settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository) { settingsXml ->
         mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
     }
 }
 
+/**
+ * Creates a Maven <code>settings.xml</code> and executes Maven with the given arguments.
+ * @param nexusCredentials Jenkins credentials which provide USERNAME and PASSWORD to an account which enables Nexus interaction
+ * @param cesFQDN the full qualified domain name of the current CES instance, f. i. <code>cesinstance.stage.host.tld</code>. The prefix <code>https://</code> will be added automatically.
+ * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
+ * @param mvnCallArgs these arguments contain the Maven arguments
+ */
 def customMvnWithSettings(def nexusCredentials, String cesFQDN, String mvnHome, String pathToLocalMavenRepository, String customMirror, String mvnCallArgs) {
     settings(nexusCredentials, cesFQDN, pathToLocalMavenRepository, customMirror) { settingsXml ->
         mvnWithHome(mvnHome, settingsXml, mvnCallArgs)
     }
 }
 
+/**
+ * Execute maven from the given Maven home.
+ * @param mvnHome the path where Maven is installed. (mandatory)
+ * @param settingsXml the path to a Maven <code>settings.xml</code> file. (mandatory)
+ * @param mvnCallArgs these arguments contain the Maven arguments. Whether these arguments are optional or not depends on your <code>pom.xml</code>.
+ */
 def mvnWithHome(String mvnHome, String settingsXml, String mvnCallArgs) {
     sh "${mvnHome}/bin/mvn -s ${settingsXml} --batch-mode -V -U -e -Dsurefire.useFile=false ${mvnCallArgs}"
 }
