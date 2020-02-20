@@ -59,7 +59,7 @@ void call(Map config = [:], String seleniumNetwork, Closure closure) {
     seleniumHubImage.pull()
     // Run with Jenkins user, so the files created in the workspace by selenium can be deleted later
     // Otherwise that would be root, and you know how hard it is to get rid of root-owned files.
-    def dockerArgs = "-u ${uid}:${gid} ${networkParameter} ${gridDebugParameter} -p 4444:${config.hubPortMapping} --name ${hubName}"
+    def dockerArgs = "-u ${uid}:${gid} ${networkParameter} ${gridDebugParameter} -p ${config.hubPortMapping}:4444 --name ${hubName}"
     seleniumHubImage.withRun(dockerArgs) { hubContainer ->
         String seleniumIp = findContainerIp(hubContainer)
 
