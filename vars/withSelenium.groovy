@@ -140,10 +140,7 @@ String generateJobName() {
     return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
 }
 
-private void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String> chromeIDs) {
-    String[] firefoxContainerIDs = firefoxIDs.toArray()
-    String[] chromeContainerIDs = chromeIDs.toArray()
-
+private void stopSeleniumSession(ArrayList<String> firefoxContainerIDs, ArrayList<String> chromeContainerIDs) {
     echo "Stopping Firefox containers..."
     stopAndLogContainers(firefoxContainerIDs)
 
@@ -155,8 +152,8 @@ private void stopSeleniumSession(ArrayList<String> firefoxIDs, Collection<String
     removeContainers(chromeContainerIDs)
 }
 
-void stopAndLogContainers(String... containerIDs) {
-    for (String containerId : containerIDs) {
+void stopAndLogContainers(ArrayList<String> containerIDs) {
+    for (containerId in containerIDs) {
         echo "Stopping container with ID ${containerId}"
         sh "docker stop ${containerId}"
 
@@ -165,8 +162,8 @@ void stopAndLogContainers(String... containerIDs) {
     }
 }
 
-void removeContainers(String... containerIDs) {
-    for (String containerId : containerIDs) {
+void removeContainers(ArrayList<String> containerIDs) {
+    for (containerId in containerIDs) {
         echo "Removing container with ID ${containerId}"
         sh "docker rm -f ${containerId}"
     }
