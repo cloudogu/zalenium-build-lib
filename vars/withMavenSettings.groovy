@@ -1,5 +1,3 @@
-final String defaultMavenCentralRepoName = "maven-central"
-
 /**
  * Provides a simple custom maven settings.xml file to current working directory with Maven Central mirror in the
  * current CES instance.
@@ -22,7 +20,7 @@ final String defaultMavenCentralRepoName = "maven-central"
  * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
  * @param closure This closure will be executed when the Maven <code>settings.xml</code> file was successfully created.
  */
-def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String mirrorNexusPath=defaultMavenCentralRepoName, Closure closure) {
+def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenRepository, String mirrorNexusPath="maven-central", Closure closure) {
     echo "write settings.xml to ${pathToLocalMavenRepository}"
     echo "local Maven repository should be located at ${pathToLocalMavenRepository}/.m2/repository"
 
@@ -64,7 +62,7 @@ def settings(def nexusCredentials, String cesFQDN, String pathToLocalMavenReposi
  * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
  * @param closure This closure will be executed when the Maven <code>settings.xml</code> file was successfully created.
  */
-def settingsWithEnvHome(def nexusCredentials, String cesFQDN, String mirrorNexusPath=defaultMavenCentralRepoName, Closure closure) {
+def settingsWithEnvHome(def nexusCredentials, String cesFQDN, String mirrorNexusPath="maven-central", Closure closure) {
     def currentHome = env.HOME
     settings(nexusCredentials, cesFQDN, currentHome, mirrorNexusPath, closure)
 }
@@ -76,7 +74,7 @@ def settingsWithEnvHome(def nexusCredentials, String cesFQDN, String mirrorNexus
  * @param mirrorNexusPath relative path to a maven central mirror hosted inside a nexus instance. The prefix <code>/nexus/repository</code> will be added automatically. Defaults to "maven-central"
  * @param mvnCallArgs these arguments contain the Maven arguments
  */
-def mvnWithSettings(def nexusCredentials, String cesFQDN, String mirrorNexusPath=defaultMavenCentralRepoName, String mvnCallArgs) {
+def mvnWithSettings(def nexusCredentials, String cesFQDN, String mirrorNexusPath="maven-central", String mvnCallArgs) {
     def currentHome = env.HOME
     settings(nexusCredentials, cesFQDN, currentHome, mirrorNexusPath) { settingsXml ->
         mvn settingsXml, mvnCallArgs
