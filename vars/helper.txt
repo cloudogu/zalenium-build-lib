@@ -1,5 +1,7 @@
-- generateZaleniumJobName() - creates a jobname unique to the current Jenkins job. For the 99th Jenkins build of the job
-  "ACME" the job name would be "ACME_99".
+- generateZaleniumJobName() - deprecated - use 'generateJobName()' instead
+
+- generateJobName() - creates a jobname unique to the current Jenkins job. For the 99th Jenkins build of the job
+  "ACME" the job name would be "ACME-99".
 
 - findHostName() - returns the host name of the current Jenkins node. This is usually needed for getting the FQDN of the
   Cloudogu EcoSystem instance which runs the Jenkins master node.

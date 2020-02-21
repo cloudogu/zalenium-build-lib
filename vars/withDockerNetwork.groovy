@@ -18,12 +18,12 @@ void call(printDebugOutput = false, Closure inner) {
     }
 }
 
+String generateJobName() {
+    return "${JOB_BASE_NAME}-${BUILD_NUMBER}"
+}
+
 void debugOut(boolean printDebugOutput, String logMessage) {
     if (printDebugOutput) {
         echo "DEBUG: " + logMessage
     }
-}
-
-String generateJobName() {
-    return "${JOB_BASE_NAME}_${BUILD_NUMBER}"
 }
