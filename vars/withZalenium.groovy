@@ -119,7 +119,7 @@ void waitForSeleniumToGetReady(String host) {
 boolean isSeleniumReady(String host) {
     sh(returnStdout: true,
             script: "curl -sSL http://${host}:4444/wd/hub/status || true") // Don't fail
-            .contains('status\": 0')
+            .contains('ready\": true')
 }
 
 void waitForSeleniumSessionsToEnd(String host) {
