@@ -59,7 +59,7 @@ void call(Map config = [:], String zaleniumNetwork, Closure closure) {
                         "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
                 'start ' +
                         "--seleniumImageName ${config.seleniumImage} " +
-                        "${config.videoRecordingEnabled ? '' : '--videoRecordingEnabled false'} " +
+                        "--videoRecordingEnabled ${config.videoRecordingEnabled} " +
                         "${config.debugZalenium ? '--debugEnabled true' : ''} " +
                         // switch off analytic gathering
                         "${config.sendGoogleAnalytics ? '--sendAnonymousUsageInfo false' : ''} "
