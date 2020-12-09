@@ -18,13 +18,14 @@
  */
 void call(Map config = [:], String zaleniumNetwork, Closure closure) {
 
-    def defaultConfig = [seleniumVersion    : '3.141.59-p8',
-                         seleniumImage      : 'elgalu/selenium',
-                         zaleniumVersion    : '3.141.59g',
-                         zaleniumImage      : 'dosel/zalenium',
-                         zaleniumVideoDir   : 'zalenium',
-                         debugZalenium      : false,
-                         sendGoogleAnalytics: false]
+    def defaultConfig = [seleniumVersion      : '3.141.59-p8',
+                         seleniumImage        : 'elgalu/selenium',
+                         zaleniumVersion      : '3.141.59g',
+                         zaleniumImage        : 'dosel/zalenium',
+                         zaleniumVideoDir     : 'zalenium',
+                         debugZalenium        : false,
+                         videoRecordingEnabled: false,
+                         sendGoogleAnalytics  : false]
 
     // Merge default config with the one passed as parameter
     config = defaultConfig << config
@@ -58,6 +59,7 @@ void call(Map config = [:], String zaleniumNetwork, Closure closure) {
                         "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
                 'start ' +
                         "--seleniumImageName ${config.seleniumImage} " +
+                        "${config.videoRecordingEnabled ? '' : '--videoRecordingEnabled false'} " +
                         "${config.debugZalenium ? '--debugEnabled true' : ''} " +
                         // switch off analytic gathering
                         "${config.sendGoogleAnalytics ? '--sendAnonymousUsageInfo false' : ''} "
