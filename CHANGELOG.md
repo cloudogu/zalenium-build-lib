@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- config parameter for controlling the video recording during test execution
+- config parameter for controlling the video recording during test execution (#11)
 
 ## [v2.0.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.0.0) - 2020-02-21
 
