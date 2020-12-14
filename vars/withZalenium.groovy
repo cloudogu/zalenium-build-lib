@@ -4,13 +4,14 @@
  *
  * @param config contains a map of settings that change the Zalenium behavior. Can be a partial map or even left out.
  *      The defaults are:
- *      [seleniumVersion   : '3.141.59-p8',
- *      seleniumImage      : 'elgalu/selenium',
- *      zaleniumVersion    : '3.141.59g',
- *      zaleniumImage      : 'dosel/zalenium',
- *      zaleniumVideoDir   : 'zalenium',
- *      sendGoogleAnalytics: false,
- *      debugZalenium      : false]
+ *      [seleniumVersion     : '3.141.59-p8',
+ *      seleniumImage        : 'elgalu/selenium',
+ *      zaleniumVersion      : '3.141.59g',
+ *      zaleniumImage        : 'dosel/zalenium',
+ *      zaleniumVideoDir     : 'zalenium',
+ *      debugZalenium        : false,
+ *      videoRecordingEnabled: false,
+ *      sendGoogleAnalytics  : false]
  * @param zaleniumNetwork The Zalenium container will be added to this docker network. This is useful if other containers
  *      must communicate with Zalenium while being in a docker network. If empty or left out, Zalenium will stay in the
  *      default network.
@@ -18,13 +19,14 @@
  */
 void call(Map config = [:], String zaleniumNetwork, Closure closure) {
 
-    def defaultConfig = [seleniumVersion    : '3.141.59-p8',
-                         seleniumImage      : 'elgalu/selenium',
-                         zaleniumVersion    : '3.141.59g',
-                         zaleniumImage      : 'dosel/zalenium',
-                         zaleniumVideoDir   : 'zalenium',
-                         debugZalenium      : false,
-                         sendGoogleAnalytics: false]
+    def defaultConfig = [seleniumVersion      : '3.141.59-p8',
+                         seleniumImage        : 'elgalu/selenium',
+                         zaleniumVersion      : '3.141.59g',
+                         zaleniumImage        : 'dosel/zalenium',
+                         zaleniumVideoDir     : 'zalenium',
+                         debugZalenium        : false,
+                         videoRecordingEnabled: false,
+                         sendGoogleAnalytics  : false]
 
     // Merge default config with the one passed as parameter
     config = defaultConfig << config
@@ -58,6 +60,7 @@ void call(Map config = [:], String zaleniumNetwork, Closure closure) {
                         "-v ${WORKSPACE}/${config.zaleniumVideoDir}:/home/seluser/videos",
                 'start ' +
                         "--seleniumImageName ${config.seleniumImage} " +
+                        "--videoRecordingEnabled ${config.videoRecordingEnabled} " +
                         "${config.debugZalenium ? '--debugEnabled true' : ''} " +
                         // switch off analytic gathering
                         "${config.sendGoogleAnalytics ? '--sendAnonymousUsageInfo false' : ''} "
@@ -77,7 +80,9 @@ void call(Map config = [:], String zaleniumNetwork, Closure closure) {
                 // Wait for Selenium sessions to end (i.e. videos to be copied)
                 // Leaving the withRun() closure leads to "docker rm -f" being called, cancelling copying
                 waitForSeleniumSessionsToEnd(zaleniumIp)
-                archiveArtifacts allowEmptyArchive: true, artifacts: "${config.zaleniumVideoDir}/*.mp4"
+                if(config.videoRecordingEnabled) {
+                    archiveArtifacts allowEmptyArchive: true, artifacts: "${config.zaleniumVideoDir}/*.mp4"
+                }
 
                 // Stop container gracefully and wait
                 sh "docker stop ${zaleniumContainer.id}"

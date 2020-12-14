@@ -10,6 +10,7 @@ Requires Docker!
 - zaleniumVersion - version of the zalenium docker image
 - zaleniumVideoDir - path where the videos are stored, relative to the Jenkins workspace.
 - debugZalenium - makes the zalenium container write a lot more logs
+- videoRecordingEnabled - enables the video recording during the test execution; defaults to false
 - sendGoogleAnalytics - if true this will send analytic data to Google/Zalando
 
 Exemplary calls:
