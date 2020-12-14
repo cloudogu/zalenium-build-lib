@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.1.0) - 2020-12-14
+
 ### Added
 
 - config parameter for controlling the video recording during test execution (#11)
