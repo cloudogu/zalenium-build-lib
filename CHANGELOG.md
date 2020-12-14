@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- config parameter for controlling the video recording during test execution (#11)
+
 ## [v2.0.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.0.0) - 2020-02-21
 
 Heads-up: Breaking change ahead!
