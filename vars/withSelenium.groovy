@@ -107,7 +107,7 @@ void waitForSeleniumToGetReady(String host) {
 
 boolean isSeleniumReady(String host) {
     def result = sh(returnStdout: true,
-            script: "curl -sSL http://${host}/wd/hub/status") // Don't fail
+            script: "curl -sSL http://${host}/wd/hub/status || true") // Don't fail
     result.contains('ready\": true')
 }
 
