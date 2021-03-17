@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-
 - waiting for the selenium grid does not fail instantly if the grid api isn't up already (#13)
 
 ## [v2.1.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.1.0) - 2020-12-14
