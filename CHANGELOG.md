@@ -6,10 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v2.1.1](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.1.1) - 2021-03-17
+### Fixed
+- waiting for the selenium grid does not fail instantly if the grid api isn't up already (#13)
+
 ## [v2.1.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.1.0) - 2020-12-14
-
 ### Added
-
 - config parameter for controlling the video recording during test execution (#11)
 
 ## [v2.0.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v2.0.0) - 2020-02-21
@@ -42,7 +44,6 @@ The release v1.2.0 introduced a defect in which the default Nexus mirror reposit
 This release contains breaking changes and should not be used. Instead use the release v2.0.0
 
 ## [v1.1.0](https://github.com/cloudogu/zalenium-build-lib/releases/tag/v1.1.0) - 2019-09-18 
-
 ### Added
 
 In this release several Maven settings and truststore helpers are added. These are addressable with following jenkins pipeline variables for which (if the library is added) help texts appear in Jenkins' pipeline steps help (#4, #6):
