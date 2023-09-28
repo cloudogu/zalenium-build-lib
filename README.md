@@ -1,5 +1,7 @@
 ![Cloudogu logo](https://cloudogu.com/images/logo.png)
 
+> DEPRECATED: Further development of this lib will be dropped because the development on zalenium was stopped.
+
 zalenium-build-lib
 =======
 
